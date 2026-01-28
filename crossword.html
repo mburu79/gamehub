@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crossword Puzzle</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@700;900&family=Open+Sans:wght@400;600&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Open Sans', sans-serif;
+      background: linear-gradient(135deg, #134e5e, #71b280);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1 {
+      font-family: 'Merriweather', serif;
+      font-size: 3.5em;
+      text-align: center;
+      margin-bottom: 10px;
+      letter-spacing: 2px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      text-align: center;
+      font-size: 1.1em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .game-area {
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+      align-items: start;
+    }
+    
+    .board-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    
+    #crossword-board {
+      display: grid;
+      gap: 2px;
+      margin: 0 auto;
+      width: fit-content;
+      background: #333;
+      padding: 2px;
+    }
+    
+    .cell {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #999;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-weight: 600;
+      font-size: 1.2em;
+      text-transform: uppercase;
+      color: #333;
+    }
+    
+    .cell input {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: 600;
+      text-transform: uppercase;
+      outline: none;
+      color: #333;
+    }
+    
+    .cell.black {
+      background: #333;
+      cursor: default;
+    }
+    
+    .cell.selected {
+      background: #ffd700;
+    }
+    
+    .cell.highlighted {
+      background: #b3d9ff;
+    }
+    
+    .cell.correct {
+      background: #c8e6c9;
+    }
+    
+    .cell.incorrect {
+      background: #ffcdd2;
+      animation: shake 0.3s;
+    }
+    
+    .cell-number {
+      position: absolute;
+      top: 2px;
+      left: 3px;
+      font-size: 0.6em;
+      font-weight: bold;
+      color: #666;
+    }
+    
+    .clues-container {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      max-height: 700px;
+      overflow-y: auto;
+      color: #333;
+    }
+    
+    .clue-section {
+      margin-bottom: 25px;
+    }
+    
+    .clue-section h3 {
+      font-family: 'Merriweather', serif;
+      font-size: 1.4em;
+      margin-bottom: 15px;
+      color: #134e5e;
+      border-bottom: 2px solid #71b280;
+      padding-bottom: 8px;
+    }
+    
+    .clue {
+      padding: 10px;
+      margin-bottom: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: rgba(113, 178, 128, 0.1);
+    }
+    
+    .clue:hover {
+      background: rgba(113, 178, 128, 0.3);
+      transform: translateX(5px);
+    }
+    
+    .clue.active {
+      background: #71b280;
+      color: white;
+      font-weight: 600;
+    }
+    
+    .clue-number {
+      font-weight: 700;
+      color: #134e5e;
+      margin-right: 8px;
+    }
+    
+    .clue.active .clue-number {
+      color: white;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 12px 25px;
+      font-family: 'Open Sans', sans-serif;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 25px;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,255,255,0.2);
+    }
+    
+    #status {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.3em;
+      font-weight: 600;
+      min-height: 30px;
+    }
+    
+    .puzzle-selector {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .puzzle-selector select {
+      padding: 10px 20px;
+      font-size: 1em;
+      border-radius: 25px;
+      border: 2px solid rgba(255,255,255,0.4);
+      background: rgba(255,255,255,0.2);
+      color: white;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    
+    .puzzle-selector select option {
+      background: #134e5e;
+      color: white;
+    }
+    
+    @media (max-width: 1000px) {
+      .game-area {
+        grid-template-columns: 1fr;
+      }
+      .clues-container {
+        max-height: 400px;
+      }
+    }
+    
+    @media (max-width: 600px) {
+      h1 { font-size: 2.5em; }
+      .cell { width: 30px; height: 30px; font-size: 1em; }
+      .cell input { font-size: 1em; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>CROSSWORD</h1>
+    <p class="subtitle">Fill in the puzzle using the clues below</p>
+    
+    <div class="puzzle-selector">
+      <select id="puzzleSelect">
+        <option value="0">Puzzle 1 - Easy</option>
+        <option value="1">Puzzle 2 - Medium</option>
+        <option value="2">Puzzle 3 - Hard</option>
+      </select>
+    </div>
+    
+    <div id="status"></div>
+    
+    <div class="game-area">
+      <div class="board-container">
+        <div id="crossword-board"></div>
+        <div class="controls">
+          <button id="check">✓ Check</button>
+          <button id="reveal">💡 Reveal Word</button>
+          <button id="revealAll">🎯 Reveal All</button>
+          <button id="clear">🔄 Clear</button>
+        </div>
+      </div>
+      
+      <div class="clues-container">
+        <div class="clue-section">
+          <h3>Across</h3>
+          <div id="acrossClues"></div>
+        </div>
+        <div class="clue-section">
+          <h3>Down</h3>
+          <div id="downClues"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PUZZLES = [
+      {
+        // Puzzle 1 - Easy
+        size: 7,
+        grid: [
+          ['C', 'A', 'T', '', 'D', 'O', 'G'],
+          ['A', '', 'R', '', 'A', '', 'O'],
+          ['R', 'U', 'N', '', 'Y', '', 'A'],
+          ['', '', '', '', '', '', 'T'],
+          ['S', 'U', 'N', '', 'B', 'E', 'D'],
+          ['H', '', 'I', '', 'I', '', ''],
+          ['E', 'A', 'T', '', 'K', 'E', 'Y']
+        ],
+        clues: {
+          across: [
+            { num: 1, clue: 'Furry pet that meows', answer: 'CAT', row: 0, col: 0 },
+            { num: 4, clue: 'Furry pet that barks', answer: 'DOG', row: 0, col: 4 },
+            { num: 7, clue: 'Move quickly on foot', answer: 'RUN', row: 2, col: 0 },
+            { num: 10, clue: 'Bright star in the sky', answer: 'SUN', row: 4, col: 0 },
+            { num: 11, clue: 'Sleep furniture', answer: 'BED', row: 4, col: 4 },
+            { num: 13, clue: 'Consume food', answer: 'EAT', row: 6, col: 0 },
+            { num: 14, clue: 'Opens a lock', answer: 'KEY', row: 6, col: 4 }
+          ],
+          down: [
+            { num: 1, clue: 'Vehicle with four wheels', answer: 'CARS', row: 0, col: 0 },
+            { num: 2, clue: 'Flying creature with wings', answer: 'ANIMAL', row: 0, col: 1 },
+            { num: 3, clue: 'Not night', answer: 'DAYTIME', row: 0, col: 4 },
+            { num: 5, clue: 'Not me, but you', answer: 'OTHER', row: 0, col: 5 },
+            { num: 6, clue: 'Large farm animal', answer: 'GOAT', row: 0, col: 6 },
+            { num: 8, clue: 'Number after one', answer: 'NINE', row: 2, col: 2 },
+            { num: 9, clue: 'Not old', answer: 'YOUTHFUL', row: 2, col: 4 },
+            { num: 12, clue: 'Opposite of out', answer: 'IN', row: 4, col: 2 }
+          ]
+        }
+      },
+      {
+        // Puzzle 2 - Medium
+        size: 9,
+        grid: [
+          ['', 'B', 'O', 'O', 'K', '', 'C', 'A', 'R'],
+          ['', 'A', '', '', 'E', '', 'O', '', 'A'],
+          ['M', 'U', 'S', 'I', 'C', '', 'F', '', 'I'],
+          ['', 'E', '', '', '', '', 'F', '', 'N'],
+          ['', '', '', 'S', 'T', 'A', 'R', '', ''],
+          ['', 'P', '', '', '', '', 'E', '', 'D'],
+          ['S', 'L', 'E', 'E', 'P', '', 'E', '', 'R'],
+          ['', 'A', '', '', '', '', '', '', 'O'],
+          ['', 'N', 'I', 'G', 'H', 'T', '', '', 'P']
+        ],
+        clues: {
+          across: [
+            { num: 1, clue: 'Read this for stories', answer: 'BOOK', row: 0, col: 1 },
+            { num: 5, clue: 'Drive this vehicle', answer: 'CAR', row: 0, col: 6 },
+            { num: 7, clue: 'Listen to melodies', answer: 'MUSIC', row: 2, col: 0 },
+            { num: 10, clue: 'Bright celestial object', answer: 'STAR', row: 4, col: 3 },
+            { num: 12, clue: 'Rest at night', answer: 'SLEEP', row: 6, col: 0 },
+            { num: 14, clue: 'Opposite of day', answer: 'NIGHT', row: 8, col: 1 }
+          ],
+          down: [
+            { num: 2, clue: 'Baseball sport action', answer: 'BATTER', row: 0, col: 1 },
+            { num: 3, clue: 'Coffee container', answer: 'MUG', row: 2, col: 0 },
+            { num: 4, clue: 'Unlock with this', answer: 'KEY', row: 0, col: 4 },
+            { num: 6, clue: 'Hot beverage drink', answer: 'COFFEE', row: 0, col: 6 },
+            { num: 8, clue: 'Precipitation drops', answer: 'RAINDROP', row: 0, col: 8 },
+            { num: 9, clue: 'Circus performer', answer: 'CLOWN', row: 2, col: 4 },
+            { num: 11, clue: 'Not shallow', answer: 'DEEP', row: 4, col: 6 },
+            { num: 13, clue: 'Landing strip', answer: 'PLANE', row: 0, col: 1 }
+          ]
+        }
+      },
+      {
+        // Puzzle 3 - Hard
+        size: 10,
+        grid: [
+          ['C', 'O', 'M', 'P', 'U', 'T', 'E', 'R', '', ''],
+          ['H', '', '', '', 'N', '', '', 'A', '', 'M'],
+          ['A', '', 'M', 'O', 'U', 'S', 'E', '', '', 'O'],
+          ['I', '', 'O', '', 'S', '', '', '', 'F', 'N'],
+          ['R', '', 'N', '', 'U', '', 'K', 'E', 'Y', 'E'],
+          ['', '', 'I', '', 'A', '', '', '', 'L', 'Y'],
+          ['S', 'C', 'R', 'E', 'E', 'N', '', '', 'E', ''],
+          ['', '', 'E', '', '', '', 'P', 'R', 'I', 'N', 'T'],
+          ['', '', 'D', '', '', '', '', '', 'L', ''],
+          ['', '', '', '', '', '', '', '', 'E', '']
+        ],
+        clues: {
+          across: [
+            { num: 1, clue: 'Electronic device for computing', answer: 'COMPUTER', row: 0, col: 0 },
+            { num: 9, clue: 'Input pointing device', answer: 'MOUSE', row: 2, col: 2 },
+            { num: 12, clue: 'Press buttons to type', answer: 'KEY', row: 4, col: 6 },
+            { num: 14, clue: 'Display monitor', answer: 'SCREEN', row: 6, col: 0 },
+            { num: 16, clue: 'Output on paper', answer: 'PRINT', row: 7, col: 6 }
+          ],
+          down: [
+            { num: 2, clue: 'Seat furniture', answer: 'CHAIR', row: 0, col: 0 },
+            { num: 3, clue: 'Keep track of time', answer: 'MONITOR', row: 2, col: 2 },
+            { num: 4, clue: 'Not typical', answer: 'UNUSUAL', row: 0, col: 4 },
+            { num: 5, clue: 'Rain cloud', answer: 'RAIN', row: 0, col: 7 },
+            { num: 6, clue: 'Currency', answer: 'MONEY', row: 0, col: 9 },
+            { num: 7, clue: 'Storage device', answer: 'FILE', row: 2, col: 8 },
+            { num: 8, clue: 'Flying insect', answer: 'FLY', row: 4, col: 8 },
+            { num: 10, clue: 'Not wide', answer: 'SCREEN', row: 6, col: 0 },
+            { num: 11, clue: 'Opposite of pull', answer: 'CREDIT', row: 2, col: 2 },
+            { num: 13, clue: 'Sound from bell', answer: 'RING', row: 7, col: 8 },
+            { num: 15, clue: 'Not empty', answer: 'PILE', row: 7, col: 8 }
+          ]
+        }
+      }
+    ];
+
+    let currentPuzzle = 0;
+    let selectedCell = null;
+    let selectedWord = null;
+    let userAnswers = {};
+
+    function init() {
+      document.getElementById('puzzleSelect').addEventListener('change', (e) => {
+        currentPuzzle = parseInt(e.target.value);
+        loadPuzzle();
+      });
+      
+      document.getElementById('check').addEventListener('click', checkAnswers);
+      document.getElementById('reveal').addEventListener('click', revealWord);
+      document.getElementById('revealAll').addEventListener('click', revealAll);
+      document.getElementById('clear').addEventListener('click', clearPuzzle);
+      
+      loadPuzzle();
+    }
+
+    function loadPuzzle() {
+      userAnswers = {};
+      selectedCell = null;
+      selectedWord = null;
+      
+      const puzzle = PUZZLES[currentPuzzle];
+      const board = document.getElementById('crossword-board');
+      board.innerHTML = '';
+      board.style.gridTemplateColumns = `repeat(${puzzle.size}, 40px)`;
+      
+      // Create grid
+      for (let row = 0; row < puzzle.size; row++) {
+        for (let col = 0; col < puzzle.size; col++) {
+          const cell = document.createElement('div');
+          cell.className = 'cell';
+          cell.dataset.row = row;
+          cell.dataset.col = col;
+          
+          if (puzzle.grid[row][col] === '') {
+            cell.classList.add('black');
+          } else {
+            const input = document.createElement('input');
+            input.maxLength = 1;
+            input.dataset.row = row;
+            input.dataset.col = col;
+            input.addEventListener('input', handleInput);
+            input.addEventListener('click', () => selectCell(row, col));
+            input.addEventListener('keydown', handleKeyDown);
+            cell.appendChild(input);
+            
+            // Add number if it's the start of a word
+            const num = getClueNumber(row, col, puzzle);
+            if (num) {
+              const numEl = document.createElement('div');
+              numEl.className = 'cell-number';
+              numEl.textContent = num;
+              cell.appendChild(numEl);
+            }
+          }
+          
+          board.appendChild(cell);
+        }
+      }
+      
+      renderClues();
+    }
+
+    function getClueNumber(row, col, puzzle) {
+      const allClues = [...puzzle.clues.across, ...puzzle.clues.down];
+      const clue = allClues.find(c => c.row === row && c.col === col);
+      return clue ? clue.num : null;
+    }
+
+    function renderClues() {
+      const puzzle = PUZZLES[currentPuzzle];
+      
+      const acrossEl = document.getElementById('acrossClues');
+      acrossEl.innerHTML = '';
+      puzzle.clues.across.forEach(clue => {
+        const div = document.createElement('div');
+        div.className = 'clue';
+        div.innerHTML = `<span class="clue-number">${clue.num}.</span>${clue.clue}`;
+        div.addEventListener('click', () => selectClue(clue, 'across'));
+        acrossEl.appendChild(div);
+      });
+      
+      const downEl = document.getElementById('downClues');
+      downEl.innerHTML = '';
+      puzzle.clues.down.forEach(clue => {
+        const div = document.createElement('div');
+        div.className = 'clue';
+        div.innerHTML = `<span class="clue-number">${clue.num}.</span>${clue.clue}`;
+        div.addEventListener('click', () => selectClue(clue, 'down'));
+        downEl.appendChild(div);
+      });
+    }
+
+    function selectCell(row, col) {
+      selectedCell = { row, col };
+      highlightWord(row, col);
+    }
+
+    function selectClue(clue, direction) {
+      selectedWord = { clue, direction };
+      
+      document.querySelectorAll('.clue').forEach(c => c.classList.remove('active'));
+      event.currentTarget.classList.add('active');
+      
+      // Highlight the word cells
+      const puzzle = PUZZLES[currentPuzzle];
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlighted', 'selected'));
+      
+      for (let i = 0; i < clue.answer.length; i++) {
+        const cellRow = direction === 'across' ? clue.row : clue.row + i;
+        const cellCol = direction === 'across' ? clue.col + i : clue.col;
+        const cell = document.querySelector(`.cell[data-row="${cellRow}"][data-col="${cellCol}"]`);
+        if (cell) cell.classList.add('highlighted');
+      }
+      
+      // Focus first cell
+      const firstInput = document.querySelector(`input[data-row="${clue.row}"][data-col="${clue.col}"]`);
+      if (firstInput) firstInput.focus();
+    }
+
+    function highlightWord(row, col) {
+      // Simple highlight - could be improved to detect word boundaries
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('highlighted', 'selected'));
+      const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+      if (cell) cell.classList.add('selected');
+    }
+
+    function handleInput(e) {
+      const input = e.target;
+      const row = parseInt(input.dataset.row);
+      const col = parseInt(input.dataset.col);
+      
+      userAnswers[`${row},${col}`] = input.value.toUpperCase();
+      
+      if (input.value) {
+        // Move to next cell
+        moveToNextCell(row, col);
+      }
+    }
+
+    function handleKeyDown(e) {
+      const input = e.target;
+      const row = parseInt(input.dataset.row);
+      const col = parseInt(input.dataset.col);
+      
+      if (e.key === 'Backspace' && !input.value) {
+        moveToPrevCell(row, col);
+      } else if (e.key === 'ArrowRight') {
+        moveToNextCell(row, col);
+        e.preventDefault();
+      } else if (e.key === 'ArrowLeft') {
+        moveToPrevCell(row, col);
+        e.preventDefault();
+      } else if (e.key === 'ArrowDown') {
+        const nextInput = document.querySelector(`input[data-row="${row + 1}"][data-col="${col}"]`);
+        if (nextInput) nextInput.focus();
+        e.preventDefault();
+      } else if (e.key === 'ArrowUp') {
+        const prevInput = document.querySelector(`input[data-row="${row - 1}"][data-col="${col}"]`);
+        if (prevInput) prevInput.focus();
+        e.preventDefault();
+      }
+    }
+
+    function moveToNextCell(row, col) {
+      const nextInput = document.querySelector(`input[data-row="${row}"][data-col="${col + 1}"]`) ||
+                       document.querySelector(`input[data-row="${row + 1}"][data-col="0"]`);
+      if (nextInput) nextInput.focus();
+    }
+
+    function moveToPrevCell(row, col) {
+      const puzzle = PUZZLES[currentPuzzle];
+      const prevInput = document.querySelector(`input[data-row="${row}"][data-col="${col - 1}"]`) ||
+                       document.querySelector(`input[data-row="${row - 1}"][data-col="${puzzle.size - 1}"]`);
+      if (prevInput) prevInput.focus();
+    }
+
+    function checkAnswers() {
+      const puzzle = PUZZLES[currentPuzzle];
+      let correct = 0;
+      let total = 0;
+      
+      document.querySelectorAll('.cell input').forEach(input => {
+        const row = parseInt(input.dataset.row);
+        const col = parseInt(input.dataset.col);
+        const correctAnswer = puzzle.grid[row][col];
+        const userAnswer = input.value.toUpperCase();
+        
+        total++;
+        const cell = input.parentElement;
+        cell.classList.remove('correct', 'incorrect');
+        
+        if (userAnswer === correctAnswer) {
+          cell.classList.add('correct');
+          correct++;
+        } else if (userAnswer) {
+          cell.classList.add('incorrect');
+        }
+      });
+      
+      const statusEl = document.getElementById('status');
+      if (correct === total) {
+        statusEl.textContent = '🎉 Perfect! You solved the puzzle!';
+      } else {
+        statusEl.textContent = `${correct} out of ${total} correct`;
+      }
+      
+      setTimeout(() => {
+        document.querySelectorAll('.cell').forEach(c => {
+          c.classList.remove('correct', 'incorrect');
+        });
+      }, 2000);
+    }
+
+    function revealWord() {
+      if (!selectedWord) {
+        document.getElementById('status').textContent = 'Select a clue first!';
+        return;
+      }
+      
+      const { clue, direction } = selectedWord;
+      const puzzle = PUZZLES[currentPuzzle];
+      
+      for (let i = 0; i < clue.answer.length; i++) {
+        const row = direction === 'across' ? clue.row : clue.row + i;
+        const col = direction === 'across' ? clue.col + i : clue.col;
+        const input = document.querySelector(`input[data-row="${row}"][data-col="${col}"]`);
+        if (input) {
+          input.value = clue.answer[i];
+          userAnswers[`${row},${col}`] = clue.answer[i];
+        }
+      }
+    }
+
+    function revealAll() {
+      if (confirm('Are you sure you want to reveal the entire puzzle?')) {
+        const puzzle = PUZZLES[currentPuzzle];
+        document.querySelectorAll('.cell input').forEach(input => {
+          const row = parseInt(input.dataset.row);
+          const col = parseInt(input.dataset.col);
+          input.value = puzzle.grid[row][col];
+        });
+        document.getElementById('status').textContent = '💡 Puzzle revealed!';
+      }
+    }
+
+    function clearPuzzle() {
+      if (confirm('Clear all your answers?')) {
+        document.querySelectorAll('.cell input').forEach(input => {
+          input.value = '';
+        });
+        userAnswers = {};
+        document.getElementById('status').textContent = '';
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

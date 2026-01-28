@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wordle</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Karla:wght@700&family=Inter:wght@400;600;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    
+    h1 {
+      font-family: 'Karla', sans-serif;
+      font-size: 3.5em;
+      margin-bottom: 10px;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .subtitle {
+      font-size: 1em;
+      margin-bottom: 25px;
+      opacity: 0.8;
+      color: #b0e0e6;
+    }
+    
+    #board {
+      display: grid;
+      grid-template-rows: repeat(6, 1fr);
+      gap: 8px;
+      margin: 30px auto;
+      max-width: 350px;
+    }
+    
+    .row {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    
+    .tile {
+      aspect-ratio: 1;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Karla', sans-serif;
+      font-size: 2em;
+      font-weight: 700;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    
+    .tile.filled {
+      border-color: rgba(255, 255, 255, 0.6);
+      transform: scale(1.05);
+    }
+    
+    .tile.correct {
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      border-color: #2193b0;
+      animation: flip 0.6s ease-in-out;
+    }
+    
+    .tile.present {
+      background: linear-gradient(135deg, #f6d365, #fda085);
+      border-color: #fda085;
+      animation: flip 0.6s ease-in-out;
+    }
+    
+    .tile.absent {
+      background: rgba(60, 60, 60, 0.8);
+      border-color: rgba(100, 100, 100, 0.6);
+      color: rgba(255, 255, 255, 0.5);
+      animation: flip 0.6s ease-in-out;
+    }
+    
+    @keyframes flip {
+      0% { transform: rotateX(0); }
+      50% { transform: rotateX(90deg); }
+      100% { transform: rotateX(0); }
+    }
+    
+    .keyboard {
+      max-width: 500px;
+      margin: 30px auto 0;
+    }
+    
+    .keyboard-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+    
+    .key {
+      min-width: 40px;
+      padding: 14px 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      font-family: 'Karla', sans-serif;
+      font-size: 0.9em;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+    
+    .key:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+    }
+    
+    .key.wide {
+      min-width: 65px;
+      font-size: 0.75em;
+    }
+    
+    .key.correct {
+      background: linear-gradient(135deg, #6dd5ed, #2193b0);
+      border-color: #2193b0;
+    }
+    
+    .key.present {
+      background: linear-gradient(135deg, #f6d365, #fda085);
+      border-color: #fda085;
+    }
+    
+    .key.absent {
+      background: rgba(60, 60, 60, 0.8);
+      border-color: rgba(100, 100, 100, 0.6);
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    #message {
+      min-height: 30px;
+      margin: 20px 0;
+      font-size: 1.2em;
+      font-weight: 600;
+      color: #6dd5ed;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 25px;
+    }
+    
+    button {
+      padding: 12px 25px;
+      font-family: 'Inter', sans-serif;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      transition: all 0.3s;
+    }
+    
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(109, 213, 237, 0.3);
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 30px;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .stat {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      padding: 15px;
+      border-radius: 12px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .stat-value {
+      font-size: 2em;
+      font-weight: 700;
+      display: block;
+      color: #6dd5ed;
+    }
+    
+    .stat-label {
+      font-size: 0.85em;
+      opacity: 0.8;
+      display: block;
+      margin-top: 5px;
+    }
+    
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    
+    .modal-content {
+      background: linear-gradient(135deg, #0f2027, #203a43);
+      padding: 40px;
+      border-radius: 20px;
+      border: 2px solid rgba(109, 213, 237, 0.5);
+      max-width: 400px;
+      text-align: center;
+    }
+    
+    .modal h2 {
+      font-family: 'Karla', sans-serif;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      color: #6dd5ed;
+    }
+    
+    .modal p {
+      font-size: 1.2em;
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+    
+    @media (max-width: 600px) {
+      h1 { font-size: 2.5em; }
+      .tile { font-size: 1.5em; }
+      .key { min-width: 32px; padding: 12px 6px; font-size: 0.8em; }
+      .key.wide { min-width: 55px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>WORDLE</h1>
+    <p class="subtitle">Guess the 5-letter word in 6 tries</p>
+    
+    <div id="message"></div>
+    
+    <div id="board"></div>
+    
+    <div class="keyboard">
+      <div class="keyboard-row">
+        <div class="key" data-key="Q">Q</div>
+        <div class="key" data-key="W">W</div>
+        <div class="key" data-key="E">E</div>
+        <div class="key" data-key="R">R</div>
+        <div class="key" data-key="T">T</div>
+        <div class="key" data-key="Y">Y</div>
+        <div class="key" data-key="U">U</div>
+        <div class="key" data-key="I">I</div>
+        <div class="key" data-key="O">O</div>
+        <div class="key" data-key="P">P</div>
+      </div>
+      <div class="keyboard-row">
+        <div class="key" data-key="A">A</div>
+        <div class="key" data-key="S">S</div>
+        <div class="key" data-key="D">D</div>
+        <div class="key" data-key="F">F</div>
+        <div class="key" data-key="G">G</div>
+        <div class="key" data-key="H">H</div>
+        <div class="key" data-key="J">J</div>
+        <div class="key" data-key="K">K</div>
+        <div class="key" data-key="L">L</div>
+      </div>
+      <div class="keyboard-row">
+        <div class="key wide" data-key="Enter">ENTER</div>
+        <div class="key" data-key="Z">Z</div>
+        <div class="key" data-key="X">X</div>
+        <div class="key" data-key="C">C</div>
+        <div class="key" data-key="V">V</div>
+        <div class="key" data-key="B">B</div>
+        <div class="key" data-key="N">N</div>
+        <div class="key" data-key="M">M</div>
+        <div class="key wide" data-key="Backspace">DELETE</div>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button id="newGame">🔄 New Word</button>
+      <button id="showStats">📊 Stats</button>
+    </div>
+    
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-value" id="gamesPlayed">0</span>
+        <span class="stat-label">Played</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="winRate">0%</span>
+        <span class="stat-label">Win Rate</span>
+      </div>
+      <div class="stat">
+        <span class="stat-value" id="currentStreak">0</span>
+        <span class="stat-label">Streak</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="gameOverModal">
+    <div class="modal-content">
+      <h2 id="modalTitle">🎉 You Won!</h2>
+      <p id="modalMessage">Great job! You guessed the word!</p>
+      <p>The word was: <strong id="modalWord"></strong></p>
+      <button onclick="closeModal()" style="margin-top: 20px;">Continue</button>
+    </div>
+  </div>
+
+  <script>
+    const WORD_LIST = [
+      'ABOUT', 'ABOVE', 'ABUSE', 'ACTOR', 'ACUTE', 'ADMIT', 'ADOPT', 'ADULT', 'AFTER', 'AGAIN',
+      'AGENT', 'AGREE', 'AHEAD', 'ALARM', 'ALBUM', 'ALERT', 'ALIEN', 'ALIGN', 'ALIKE', 'ALIVE',
+      'ALLOW', 'ALONE', 'ALONG', 'ALTER', 'AMBER', 'AMEND', 'AMONG', 'ANGEL', 'ANGER', 'ANGLE',
+      'ANGRY', 'APART', 'APPLE', 'APPLY', 'ARENA', 'ARGUE', 'ARISE', 'ARRAY', 'ARROW', 'ASIDE',
+      'ASSET', 'AUDIO', 'AUDIT', 'AVOID', 'AWARD', 'AWARE', 'BADLY', 'BAKER', 'BASES', 'BASIC',
+      'BEACH', 'BEGAN', 'BEGIN', 'BEGUN', 'BEING', 'BELOW', 'BENCH', 'BILLY', 'BIRTH', 'BLACK',
+      'BLADE', 'BLAME', 'BLANK', 'BLAST', 'BLEED', 'BLESS', 'BLIND', 'BLOCK', 'BLOOD', 'BLOOM',
+      'BOARD', 'BOOST', 'BOOTH', 'BOUND', 'BRAIN', 'BRAND', 'BRAVE', 'BREAD', 'BREAK', 'BREED',
+      'BRIEF', 'BRING', 'BROAD', 'BROKE', 'BROWN', 'BUILD', 'BUILT', 'BUYER', 'CABLE', 'CALIF',
+      'CARRY', 'CATCH', 'CAUSE', 'CHAIN', 'CHAIR', 'CHART', 'CHASE', 'CHEAP', 'CHECK', 'CHEST',
+      'CHIEF', 'CHILD', 'CHINA', 'CHOSE', 'CIVIL', 'CLAIM', 'CLASS', 'CLEAN', 'CLEAR', 'CLICK',
+      'CLOCK', 'CLOSE', 'COACH', 'COAST', 'COULD', 'COUNT', 'COURT', 'COVER', 'CRAFT', 'CRASH',
+      'CREAM', 'CRIME', 'CROSS', 'CROWD', 'CROWN', 'CRUDE', 'CURVE', 'CYCLE', 'DAILY', 'DANCE',
+      'DATED', 'DEALT', 'DEATH', 'DEBUT', 'DELAY', 'DEPTH', 'DOING', 'DOUBT', 'DOZEN', 'DRAFT',
+      'DRAMA', 'DRANK', 'DRAWN', 'DREAM', 'DRESS', 'DRILL', 'DRINK', 'DRIVE', 'DROVE', 'DYING',
+      'EAGER', 'EARLY', 'EARTH', 'EIGHT', 'ELITE', 'EMPTY', 'ENEMY', 'ENJOY', 'ENTER', 'ENTRY',
+      'EQUAL', 'ERROR', 'EVENT', 'EVERY', 'EXACT', 'EXIST', 'EXTRA', 'FAITH', 'FALSE', 'FAULT',
+      'FIBER', 'FIELD', 'FIFTH', 'FIFTY', 'FIGHT', 'FINAL', 'FIRST', 'FIXED', 'FLASH', 'FLEET',
+      'FLOOR', 'FLUID', 'FOCUS', 'FORCE', 'FORTH', 'FORTY', 'FORUM', 'FOUND', 'FRAME', 'FRANK',
+      'FRAUD', 'FRESH', 'FRONT', 'FRUIT', 'FULLY', 'FUNNY', 'GIANT', 'GIVEN', 'GLASS', 'GLOBE',
+      'GOING', 'GRACE', 'GRADE', 'GRAND', 'GRANT', 'GRASS', 'GREAT', 'GREEN', 'GROSS', 'GROUP',
+      'GROWN', 'GUARD', 'GUESS', 'GUEST', 'GUIDE', 'HAPPY', 'HARRY', 'HEART', 'HEAVY', 'HENCE',
+      'HENRY', 'HORSE', 'HOTEL', 'HOUSE', 'HUMAN', 'IDEAL', 'IMAGE', 'INDEX', 'INNER', 'INPUT',
+      'ISSUE', 'JAPAN', 'JIMMY', 'JOINT', 'JONES', 'JUDGE', 'KNOWN', 'LABEL', 'LARGE', 'LASER',
+      'LATER', 'LAUGH', 'LAYER', 'LEARN', 'LEASE', 'LEAST', 'LEAVE', 'LEGAL', 'LEMON', 'LEVEL',
+      'LEWIS', 'LIGHT', 'LIMIT', 'LINKS', 'LIVES', 'LOCAL', 'LOGIC', 'LOOSE', 'LOWER', 'LUCKY',
+      'LUNCH', 'LYING', 'MAGIC', 'MAJOR', 'MAKER', 'MARCH', 'MARIA', 'MATCH', 'MAYBE', 'MAYOR',
+      'MEANT', 'MEDIA', 'METAL', 'MIGHT', 'MINOR', 'MINUS', 'MIXED', 'MODEL', 'MONEY', 'MONTH',
+      'MORAL', 'MOTOR', 'MOUNT', 'MOUSE', 'MOUTH', 'MOVIE', 'MUSIC', 'NEEDS', 'NEVER', 'NEWLY',
+      'NIGHT', 'NOISE', 'NORTH', 'NOTED', 'NOVEL', 'NURSE', 'OCCUR', 'OCEAN', 'OFFER', 'OFTEN',
+      'ORDER', 'OTHER', 'OUGHT', 'PAINT', 'PANEL', 'PAPER', 'PARTY', 'PEACE', 'PETER', 'PHASE',
+      'PHONE', 'PHOTO', 'PIECE', 'PILOT', 'PITCH', 'PLACE', 'PLAIN', 'PLANE', 'PLANT', 'PLATE',
+      'POINT', 'POUND', 'POWER', 'PRESS', 'PRICE', 'PRIDE', 'PRIME', 'PRINT', 'PRIOR', 'PRIZE',
+      'PROOF', 'PROUD', 'PROVE', 'QUEEN', 'QUICK', 'QUIET', 'QUITE', 'RADIO', 'RAISE', 'RANGE',
+      'RAPID', 'RATIO', 'REACH', 'READY', 'REFER', 'RIGHT', 'RIVAL', 'RIVER', 'ROBIN', 'ROGER',
+      'ROMAN', 'ROUGH', 'ROUND', 'ROUTE', 'ROYAL', 'RURAL', 'SCALE', 'SCENE', 'SCOPE', 'SCORE',
+      'SENSE', 'SERVE', 'SEVEN', 'SHALL', 'SHAPE', 'SHARE', 'SHARP', 'SHEET', 'SHELF', 'SHELL',
+      'SHIFT', 'SHINE', 'SHIRT', 'SHOCK', 'SHOOT', 'SHORT', 'SHOWN', 'SIGHT', 'SINCE', 'SIXTH',
+      'SIXTY', 'SIZED', 'SKILL', 'SLEEP', 'SLIDE', 'SMALL', 'SMART', 'SMILE', 'SMITH', 'SMOKE',
+      'SOLID', 'SOLVE', 'SORRY', 'SOUND', 'SOUTH', 'SPACE', 'SPARE', 'SPEAK', 'SPEED', 'SPEND',
+      'SPENT', 'SPLIT', 'SPOKE', 'SPORT', 'STAFF', 'STAGE', 'STAKE', 'STAND', 'START', 'STATE',
+      'STEAM', 'STEEL', 'STICK', 'STILL', 'STOCK', 'STONE', 'STOOD', 'STORE', 'STORM', 'STORY',
+      'STRIP', 'STUCK', 'STUDY', 'STUFF', 'STYLE', 'SUGAR', 'SUITE', 'SUPER', 'SWEET', 'TABLE',
+      'TAKEN', 'TASTE', 'TAXES', 'TEACH', 'TERRY', 'TEXAS', 'THANK', 'THEFT', 'THEIR', 'THEME',
+      'THERE', 'THESE', 'THICK', 'THING', 'THINK', 'THIRD', 'THOSE', 'THREE', 'THREW', 'THROW',
+      'TIGHT', 'TIMES', 'TIRED', 'TITLE', 'TODAY', 'TOPIC', 'TOTAL', 'TOUCH', 'TOUGH', 'TOWER',
+      'TRACK', 'TRADE', 'TRAIN', 'TREAT', 'TREND', 'TRIAL', 'TRIBE', 'TRICK', 'TRIED', 'TRIES',
+      'TROOP', 'TROUBLE', 'TRUCK', 'TRULY', 'TRUMP', 'TRUST', 'TRUTH', 'TWELVE', 'TWENTY', 'TWICE',
+      'UNCLE', 'UNDER', 'UNION', 'UNITY', 'UNTIL', 'UPPER', 'URBAN', 'USAGE', 'USUAL', 'VALID',
+      'VALUE', 'VIDEO', 'VIRUS', 'VISIT', 'VITAL', 'VOCAL', 'VOICE', 'WASTE', 'WATCH', 'WATER',
+      'WHEEL', 'WHERE', 'WHICH', 'WHILE', 'WHITE', 'WHOLE', 'WHOSE', 'WOMAN', 'WOMEN', 'WORLD',
+      'WORRY', 'WORSE', 'WORST', 'WORTH', 'WOULD', 'WOUND', 'WRITE', 'WRONG', 'WROTE', 'YIELD',
+      'YOUNG', 'YOUTH'
+    ];
+    
+    let targetWord = '';
+    let currentRow = 0;
+    let currentTile = 0;
+    let currentGuess = '';
+    let gameOver = false;
+    let stats = { played: 0, won: 0, currentStreak: 0, maxStreak: 0 };
+    
+    const boardEl = document.getElementById('board');
+    const messageEl = document.getElementById('message');
+    const keys = document.querySelectorAll('.key');
+
+    function init() {
+      createBoard();
+      loadStats();
+      updateStatsDisplay();
+      newGame();
+      
+      keys.forEach(key => {
+        key.addEventListener('click', () => handleKey(key.dataset.key));
+      });
+      
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') handleKey('Enter');
+        else if (e.key === 'Backspace') handleKey('Backspace');
+        else if (/^[a-zA-Z]$/.test(e.key)) handleKey(e.key.toUpperCase());
+      });
+      
+      document.getElementById('newGame').addEventListener('click', newGame);
+      document.getElementById('showStats').addEventListener('click', showStatsModal);
+    }
+
+    function createBoard() {
+      for (let i = 0; i < 6; i++) {
+        const row = document.createElement('div');
+        row.className = 'row';
+        for (let j = 0; j < 5; j++) {
+          const tile = document.createElement('div');
+          tile.className = 'tile';
+          tile.dataset.row = i;
+          tile.dataset.col = j;
+          row.appendChild(tile);
+        }
+        boardEl.appendChild(row);
+      }
+    }
+
+    function newGame() {
+      targetWord = WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)];
+      currentRow = 0;
+      currentTile = 0;
+      currentGuess = '';
+      gameOver = false;
+      messageEl.textContent = '';
+      
+      document.querySelectorAll('.tile').forEach(tile => {
+        tile.textContent = '';
+        tile.className = 'tile';
+      });
+      
+      document.querySelectorAll('.key').forEach(key => {
+        key.className = 'key' + (key.dataset.key.length > 1 ? ' wide' : '');
+      });
+    }
+
+    function handleKey(key) {
+      if (gameOver) return;
+      
+      if (key === 'Enter') {
+        if (currentTile === 5) {
+          submitGuess();
+        } else {
+          showMessage('Not enough letters!');
+        }
+      } else if (key === 'Backspace') {
+        if (currentTile > 0) {
+          currentTile--;
+          currentGuess = currentGuess.slice(0, -1);
+          updateTile(currentRow, currentTile, '');
+        }
+      } else if (currentTile < 5) {
+        currentGuess += key;
+        updateTile(currentRow, currentTile, key);
+        currentTile++;
+      }
+    }
+
+    function updateTile(row, col, letter) {
+      const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+      tile.textContent = letter;
+      if (letter) {
+        tile.classList.add('filled');
+      } else {
+        tile.classList.remove('filled');
+      }
+    }
+
+    function submitGuess() {
+      if (!WORD_LIST.includes(currentGuess)) {
+        showMessage('Not in word list!');
+        return;
+      }
+      
+      const result = checkGuess(currentGuess);
+      
+      result.forEach((status, i) => {
+        setTimeout(() => {
+          const tile = document.querySelector(`[data-row="${currentRow}"][data-col="${i}"]`);
+          tile.classList.add(status);
+          updateKeyboard(currentGuess[i], status);
+        }, i * 100);
+      });
+      
+      if (currentGuess === targetWord) {
+        setTimeout(() => {
+          gameOver = true;
+          stats.played++;
+          stats.won++;
+          stats.currentStreak++;
+          stats.maxStreak = Math.max(stats.maxStreak, stats.currentStreak);
+          saveStats();
+          updateStatsDisplay();
+          showWinModal();
+        }, 600);
+      } else if (currentRow === 5) {
+        setTimeout(() => {
+          gameOver = true;
+          stats.played++;
+          stats.currentStreak = 0;
+          saveStats();
+          updateStatsDisplay();
+          showLoseModal();
+        }, 600);
+      } else {
+        currentRow++;
+        currentTile = 0;
+        currentGuess = '';
+      }
+    }
+
+    function checkGuess(guess) {
+      const result = Array(5).fill('absent');
+      const targetLetters = targetWord.split('');
+      const guessLetters = guess.split('');
+      
+      // Check for correct positions
+      guessLetters.forEach((letter, i) => {
+        if (letter === targetLetters[i]) {
+          result[i] = 'correct';
+          targetLetters[i] = null;
+          guessLetters[i] = null;
+        }
+      });
+      
+      // Check for present letters
+      guessLetters.forEach((letter, i) => {
+        if (letter && targetLetters.includes(letter)) {
+          result[i] = 'present';
+          targetLetters[targetLetters.indexOf(letter)] = null;
+        }
+      });
+      
+      return result;
+    }
+
+    function updateKeyboard(letter, status) {
+      const key = document.querySelector(`[data-key="${letter}"]`);
+      if (!key) return;
+      
+      const currentStatus = key.classList.contains('correct') ? 'correct' :
+                           key.classList.contains('present') ? 'present' :
+                           key.classList.contains('absent') ? 'absent' : '';
+      
+      if (status === 'correct' || (status === 'present' && currentStatus !== 'correct') || 
+          (status === 'absent' && !currentStatus)) {
+        key.classList.remove('correct', 'present', 'absent');
+        key.classList.add(status);
+      }
+    }
+
+    function showMessage(msg) {
+      messageEl.textContent = msg;
+      setTimeout(() => messageEl.textContent = '', 2000);
+    }
+
+    function showWinModal() {
+      document.getElementById('modalTitle').textContent = '🎉 You Won!';
+      document.getElementById('modalMessage').textContent = `Great job! You guessed it in ${currentRow + 1} tries!`;
+      document.getElementById('modalWord').textContent = targetWord;
+      document.getElementById('gameOverModal').style.display = 'flex';
+    }
+
+    function showLoseModal() {
+      document.getElementById('modalTitle').textContent = '😢 Game Over';
+      document.getElementById('modalMessage').textContent = 'Better luck next time!';
+      document.getElementById('modalWord').textContent = targetWord;
+      document.getElementById('gameOverModal').style.display = 'flex';
+    }
+
+    function showStatsModal() {
+      alert(`Games Played: ${stats.played}\nWon: ${stats.won}\nWin Rate: ${((stats.won/stats.played)*100 || 0).toFixed(1)}%\nCurrent Streak: ${stats.currentStreak}\nMax Streak: ${stats.maxStreak}`);
+    }
+
+    function closeModal() {
+      document.getElementById('gameOverModal').style.display = 'none';
+    }
+
+    function updateStatsDisplay() {
+      document.getElementById('gamesPlayed').textContent = stats.played;
+      document.getElementById('winRate').textContent = stats.played > 0 ? 
+        `${((stats.won/stats.played)*100).toFixed(0)}%` : '0%';
+      document.getElementById('currentStreak').textContent = stats.currentStreak;
+    }
+
+    function saveStats() {
+      localStorage.setItem('wordleStats', JSON.stringify(stats));
+    }
+
+    function loadStats() {
+      const saved = localStorage.getItem('wordleStats');
+      if (saved) {
+        stats = JSON.parse(saved);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

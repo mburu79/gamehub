@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Welcome - Game Hub</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 40, 200, 0.15), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(200, 40, 120, 0.15), transparent 40%),
+        linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      overflow: hidden;
+    }
+    
+    .stars {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 4s infinite;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    .container {
+      text-align: center;
+      z-index: 10;
+      max-width: 600px;
+      padding: 40px;
+    }
+    
+    h1 {
+      font-family: 'Righteous', cursive;
+      font-size: 5em;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+      animation: glow 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% { filter: brightness(1); }
+      50% { filter: brightness(1.3); }
+    }
+    
+    .subtitle {
+      font-size: 1.5em;
+      color: #b8b8d1;
+      font-weight: 300;
+      letter-spacing: 2px;
+      margin-bottom: 60px;
+    }
+    
+    .heart {
+      font-size: 4em;
+      margin-bottom: 30px;
+      animation: heartbeat 1.5s ease-in-out infinite;
+      filter: drop-shadow(0 0 20px rgba(255, 100, 150, 0.6));
+    }
+    
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .login-form {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+      text-align: left;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b8b8d1;
+      font-size: 0.9em;
+      font-weight: 600;
+    }
+    
+    input {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      font-size: 1em;
+      font-family: 'Poppins', sans-serif;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      outline: none;
+      border-color: rgba(102, 126, 234, 0.6);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 10px;
+      color: white;
+      font-size: 1.1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .error-message {
+      color: #ff6b6b;
+      font-size: 0.9em;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .error-message.show {
+      display: block;
+    }
+    
+    .setup-message {
+      background: rgba(102, 126, 234, 0.2);
+      border: 1px solid rgba(102, 126, 234, 0.4);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      font-size: 0.85em;
+      color: #b8b8d1;
+    }
+    
+    .tagline {
+      color: #888;
+      font-size: 0.9em;
+      margin-top: 40px;
+      font-style: italic;
+    }
+    
+    @media (max-width: 600px) {
+      h1 { font-size: 3em; }
+      .user-selection { flex-direction: column; }
+      .user-card { min-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="stars" id="stars"></div>
+
+  <div class="container">
+    <div class="heart">❤️</div>
+    <h1>WELCOME</h1>
+    <p class="subtitle">Login to Game Hub</p>
+    
+    <div class="login-form">
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            placeholder="Enter your username"
+            required
+          />
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            placeholder="Enter your password"
+            required
+          />
+        </div>
+        
+        <button type="submit" class="login-btn">Login</button>
+        
+        <div class="error-message" id="errorMessage">
+          Invalid username or password. Please try again.
+        </div>
+      </form>
+      
+      <div class="setup-message">
+        <strong>🔐 First time setup:</strong><br>
+        Default credentials:<br>
+        <strong>Mburu:</strong> username: mburu | password: mburu123<br>
+        <strong>Gatete:</strong> username: gatete | password: gatete123<br>
+        <em>(You can change these in settings after login)</em>
+      </div>
+    </div>
+    
+    <p class="tagline">"Together in every game, every moment"</p>
+  </div>
+
+  <script>
+    // Generate random stars
+    const starsContainer = document.getElementById('stars');
+    for (let i = 0; i < 100; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      star.style.left = Math.random() * 100 + '%';
+      star.style.top = Math.random() * 100 + '%';
+      star.style.animationDelay = Math.random() * 4 + 's';
+      starsContainer.appendChild(star);
+    }
+
+    // Initialize default users if not set
+    if (!localStorage.getItem('users')) {
+      const defaultUsers = {
+        mburu: {
+          username: 'mburu',
+          password: 'mburu123',
+          displayName: 'Mburu',
+          email: '',
+          phone: ''
+        },
+        gatete: {
+          username: 'gatete',
+          password: 'gatete123',
+          displayName: 'Gatete',
+          email: '',
+          phone: ''
+        }
+      };
+      localStorage.setItem('users', JSON.stringify(defaultUsers));
+    }
+
+    function handleLogin(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('username').value.toLowerCase().trim();
+      const password = document.getElementById('password').value;
+      const errorMessage = document.getElementById('errorMessage');
+      
+      // Get stored users
+      const users = JSON.parse(localStorage.getItem('users'));
+      
+      // Check if user exists and password matches
+      const user = users[username];
+      
+      if (user && user.password === password) {
+        // Login successful
+        localStorage.setItem('currentUser', user.displayName);
+        localStorage.setItem('currentUsername', username);
+        localStorage.setItem('loginTime', new Date().toISOString());
+        window.location.href = 'index.html';
+      } else {
+        // Login failed
+        errorMessage.classList.add('show');
+        document.getElementById('password').value = '';
+        
+        // Hide error after 3 seconds
+        setTimeout(() => {
+          errorMessage.classList.remove('show');
+        }, 3000);
+      }
+    }
+    
+    // Check if already logged in
+    if (localStorage.getItem('currentUser')) {
+      const lastLogin = new Date(localStorage.getItem('loginTime'));
+      const now = new Date();
+      const hoursSince = (now - lastLogin) / (1000 * 60 * 60);
+      
+      // Auto-login if less than 24 hours
+      if (hoursSince < 24) {
+        window.location.href = 'index.html';
+      }
+    }
+  </script>
+</body>
+</html>

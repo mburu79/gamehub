@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whiteboard - Our Space</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&family=Indie+Flower&family=Poppins:wght@300;400;600&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-family: 'Permanent Marker', cursive;
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .mode-selector {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    
+    .mode-btn {
+      padding: 12px 30px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 15px;
+      transition: all 0.3s;
+    }
+    
+    .mode-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .mode-btn.active {
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      box-shadow: 0 5px 20px rgba(255,255,255,0.3);
+    }
+    
+    .mode-content {
+      display: none;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      min-height: 600px;
+    }
+    
+    .mode-content.active {
+      display: block;
+    }
+    
+    /* Sticky Notes Mode */
+    #sticky-notes-board {
+      position: relative;
+      min-height: 600px;
+      background: 
+        repeating-linear-gradient(0deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 30px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 1px, transparent 1px, transparent 30px);
+    }
+    
+    .sticky-note {
+      position: absolute;
+      width: 200px;
+      min-height: 200px;
+      padding: 20px;
+      background: #ffd700;
+      box-shadow: 5px 5px 15px rgba(0,0,0,0.3);
+      cursor: move;
+      font-family: 'Indie Flower', cursive;
+      font-size: 1.1em;
+      color: #333;
+      transform: rotate(-2deg);
+      transition: transform 0.2s;
+    }
+    
+    .sticky-note:hover {
+      transform: rotate(0deg) scale(1.05);
+      z-index: 1000;
+    }
+    
+    .sticky-note.color-yellow { background: #ffd700; }
+    .sticky-note.color-pink { background: #ffb3d9; }
+    .sticky-note.color-blue { background: #a3d5ff; }
+    .sticky-note.color-green { background: #b3ffb3; }
+    
+    .sticky-note textarea {
+      width: 100%;
+      height: 120px;
+      border: none;
+      background: transparent;
+      font-family: 'Indie Flower', cursive;
+      font-size: 1em;
+      color: #333;
+      resize: none;
+      outline: none;
+    }
+    
+    .sticky-note .note-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      font-size: 0.8em;
+    }
+    
+    .sticky-note .delete-note {
+      cursor: pointer;
+      padding: 5px 10px;
+      background: rgba(255,0,0,0.2);
+      border-radius: 5px;
+      transition: background 0.2s;
+    }
+    
+    .sticky-note .delete-note:hover {
+      background: rgba(255,0,0,0.4);
+    }
+    
+    .add-note-btn {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: #667eea;
+      color: white;
+      font-size: 2em;
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+    }
+    
+    .add-note-btn:hover {
+      transform: scale(1.1) rotate(90deg);
+    }
+    
+    /* Canvas Mode */
+    #drawing-canvas {
+      display: block;
+      background: white;
+      cursor: crosshair;
+      border-radius: 10px;
+    }
+    
+    .canvas-tools {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    
+    .tool-btn {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .tool-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .tool-btn.active {
+      background: #764ba2;
+      box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+    }
+    
+    .color-picker {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .color-option {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: all 0.2s;
+    }
+    
+    .color-option:hover {
+      transform: scale(1.2);
+    }
+    
+    .color-option.active {
+      border-color: #333;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    
+    /* Messages Mode */
+    .messages-container {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      color: #333;
+    }
+    
+    .messages-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f5f5f5;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .message {
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 10px;
+      max-width: 70%;
+      animation: slideIn 0.3s;
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message.mburu {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      margin-left: auto;
+      text-align: right;
+    }
+    
+    .message.gatete {
+      background: linear-gradient(135deg, #f093fb, #f5576c);
+      color: white;
+      margin-right: auto;
+    }
+    
+    .message-author {
+      font-weight: 600;
+      font-size: 0.9em;
+      margin-bottom: 5px;
+      opacity: 0.8;
+    }
+    
+    .message-text {
+      font-size: 1.1em;
+      line-height: 1.5;
+    }
+    
+    .message-time {
+      font-size: 0.8em;
+      opacity: 0.7;
+      margin-top: 5px;
+    }
+    
+    .message-input-area {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .message-input-area textarea {
+      flex: 1;
+      padding: 15px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1em;
+      resize: none;
+      outline: none;
+    }
+    
+    .message-input-area textarea:focus {
+      border-color: #667eea;
+    }
+    
+    .message-input-area button {
+      padding: 15px 30px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .message-input-area button:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .mode-selector { flex-direction: column; }
+      .sticky-note { width: 150px; min-height: 150px; }
+      .message { max-width: 85%; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-btn">← Back to Hub</a>
+    
+    <header>
+      <h1>📝 OUR WHITEBOARD</h1>
+    </header>
+    
+    <div class="mode-selector">
+      <button class="mode-btn active" data-mode="sticky">📌 Sticky Notes</button>
+      <button class="mode-btn" data-mode="canvas">🎨 Drawing Canvas</button>
+      <button class="mode-btn" data-mode="messages">💬 Messages</button>
+    </div>
+    
+    <!-- Sticky Notes Mode -->
+    <div class="mode-content active" id="sticky-mode">
+      <div id="sticky-notes-board"></div>
+      <button class="add-note-btn" onclick="addStickyNote()">+</button>
+    </div>
+    
+    <!-- Canvas Mode -->
+    <div class="mode-content" id="canvas-mode">
+      <div class="canvas-tools">
+        <div class="color-picker">
+          <div class="color-option active" style="background: #000;" data-color="#000"></div>
+          <div class="color-option" style="background: #e74c3c;" data-color="#e74c3c"></div>
+          <div class="color-option" style="background: #3498db;" data-color="#3498db"></div>
+          <div class="color-option" style="background: #2ecc71;" data-color="#2ecc71"></div>
+          <div class="color-option" style="background: #f39c12;" data-color="#f39c12"></div>
+          <div class="color-option" style="background: #9b59b6;" data-color="#9b59b6"></div>
+        </div>
+        <button class="tool-btn active" data-tool="pen">✏️ Pen</button>
+        <button class="tool-btn" data-tool="eraser">🧹 Eraser</button>
+        <button class="tool-btn" onclick="clearCanvas()">🗑️ Clear All</button>
+      </div>
+      <canvas id="drawing-canvas" width="1200" height="600"></canvas>
+    </div>
+    
+    <!-- Messages Mode -->
+    <div class="mode-content" id="messages-mode">
+      <div class="messages-container">
+        <div class="messages-list" id="messages-list"></div>
+        <div class="message-input-area">
+          <textarea id="message-input" rows="3" placeholder="Type your message..."></textarea>
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem('currentUser') || 'Guest';
+    let currentMode = 'sticky';
+    let stickyNotes = JSON.parse(localStorage.getItem('stickyNotes')) || [];
+    let messages = JSON.parse(localStorage.getItem('whiteboardMessages')) || [];
+    
+    // Canvas variables
+    let canvas, ctx;
+    let isDrawing = false;
+    let currentColor = '#000';
+    let currentTool = 'pen';
+    let canvasData = localStorage.getItem('canvasData');
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadStickyNotes();
+      initCanvas();
+      loadMessages();
+      
+      // Mode switching
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentMode = btn.dataset.mode;
+          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          
+          document.querySelectorAll('.mode-content').forEach(c => c.classList.remove('active'));
+          document.getElementById(`${currentMode}-mode`).classList.add('active');
+        });
+      });
+      
+      // Color picker
+      document.querySelectorAll('.color-option').forEach(opt => {
+        opt.addEventListener('click', () => {
+          document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
+          opt.classList.add('active');
+          currentColor = opt.dataset.color;
+        });
+      });
+      
+      // Tool buttons
+      document.querySelectorAll('.tool-btn[data-tool]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.tool-btn[data-tool]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentTool = btn.dataset.tool;
+        });
+      });
+      
+      // Message input enter key
+      document.getElementById('message-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+    });
+    
+    // Sticky Notes Functions
+    function addStickyNote() {
+      const colors = ['yellow', 'pink', 'blue', 'green'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      const note = {
+        id: Date.now(),
+        text: '',
+        color: randomColor,
+        x: Math.random() * (window.innerWidth - 300),
+        y: Math.random() * 400,
+        author: currentUser,
+        timestamp: new Date().toISOString()
+      };
+      
+      stickyNotes.push(note);
+      saveStickyNotes();
+      renderStickyNote(note);
+    }
+    
+    function renderStickyNote(note) {
+      const noteEl = document.createElement('div');
+      noteEl.className = `sticky-note color-${note.color}`;
+      noteEl.style.left = note.x + 'px';
+      noteEl.style.top = note.y + 'px';
+      noteEl.dataset.id = note.id;
+      
+      noteEl.innerHTML = `
+        <textarea placeholder="Write a note...">${note.text}</textarea>
+        <div class="note-footer">
+          <span>${note.author}</span>
+          <span class="delete-note" onclick="deleteStickyNote(${note.id})">🗑️</span>
+        </div>
+      `;
+      
+      const textarea = noteEl.querySelector('textarea');
+      textarea.addEventListener('input', () => {
+        note.text = textarea.value;
+        saveStickyNotes();
+      });
+      
+      // Make draggable
+      let isDragging = false;
+      let offsetX, offsetY;
+      
+      noteEl.addEventListener('mousedown', (e) => {
+        if (e.target.tagName === 'TEXTAREA') return;
+        isDragging = true;
+        offsetX = e.clientX - note.x;
+        offsetY = e.clientY - note.y;
+        noteEl.style.zIndex = 1000;
+      });
+      
+      document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+          note.x = e.clientX - offsetX;
+          note.y = e.clientY - offsetY;
+          noteEl.style.left = note.x + 'px';
+          noteEl.style.top = note.y + 'px';
+        }
+      });
+      
+      document.addEventListener('mouseup', () => {
+        if (isDragging) {
+          isDragging = false;
+          noteEl.style.zIndex = '';
+          saveStickyNotes();
+        }
+      });
+      
+      document.getElementById('sticky-notes-board').appendChild(noteEl);
+    }
+    
+    function loadStickyNotes() {
+      document.getElementById('sticky-notes-board').innerHTML = '';
+      stickyNotes.forEach(note => renderStickyNote(note));
+    }
+    
+    function deleteStickyNote(id) {
+      stickyNotes = stickyNotes.filter(n => n.id !== id);
+      saveStickyNotes();
+      loadStickyNotes();
+    }
+    
+    function saveStickyNotes() {
+      localStorage.setItem('stickyNotes', JSON.stringify(stickyNotes));
+    }
+    
+    // Canvas Functions
+    function initCanvas() {
+      canvas = document.getElementById('drawing-canvas');
+      ctx = canvas.getContext('2d');
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = 3;
+      
+      if (canvasData) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0);
+        img.src = canvasData;
+      }
+      
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // Touch support
+      canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousedown', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const touch = e.touches[0];
+        const mouseEvent = new MouseEvent('mousemove', {
+          clientX: touch.clientX,
+          clientY: touch.clientY
+        });
+        canvas.dispatchEvent(mouseEvent);
+      });
+      
+      canvas.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        const mouseEvent = new MouseEvent('mouseup', {});
+        canvas.dispatchEvent(mouseEvent);
+      });
+    }
+    
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = canvas.getBoundingClientRect();
+      ctx.beginPath();
+      ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      if (currentTool === 'pen') {
+        ctx.strokeStyle = currentColor;
+        ctx.lineWidth = 3;
+      } else {
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 20;
+      }
+      
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+    
+    function stopDrawing() {
+      if (isDrawing) {
+        isDrawing = false;
+        saveCanvas();
+      }
+    }
+    
+    function clearCanvas() {
+      if (confirm('Clear the entire canvas?')) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        saveCanvas();
+      }
+    }
+    
+    function saveCanvas() {
+      localStorage.setItem('canvasData', canvas.toDataURL());
+    }
+    
+    // Messages Functions
+    function sendMessage() {
+      const input = document.getElementById('message-input');
+      const text = input.value.trim();
+      
+      if (!text) return;
+      
+      const message = {
+        id: Date.now(),
+        text: text,
+        author: currentUser,
+        timestamp: new Date().toISOString()
+      };
+      
+      messages.push(message);
+      saveMessages();
+      input.value = '';
+      renderMessage(message);
+      
+      // Scroll to bottom
+      const list = document.getElementById('messages-list');
+      list.scrollTop = list.scrollHeight;
+    }
+    
+    function renderMessage(msg) {
+      const msgEl = document.createElement('div');
+      msgEl.className = `message ${msg.author.toLowerCase()}`;
+      
+      const time = new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+      
+      msgEl.innerHTML = `
+        <div class="message-author">${msg.author}</div>
+        <div class="message-text">${msg.text}</div>
+        <div class="message-time">${time}</div>
+      `;
+      
+      document.getElementById('messages-list').appendChild(msgEl);
+    }
+    
+    function loadMessages() {
+      const list = document.getElementById('messages-list');
+      list.innerHTML = '';
+      messages.forEach(msg => renderMessage(msg));
+      list.scrollTop = list.scrollHeight;
+    }
+    
+    function saveMessages() {
+      localStorage.setItem('whiteboardMessages', JSON.stringify(messages));
+    }
+  </script>
+</body>
+</html>

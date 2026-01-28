@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bucket List - Our Dreams</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-family: 'Righteous', cursive;
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+    
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2.5em;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+    
+    .add-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 25px;
+      margin-bottom: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: #333;
+    }
+    
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .category-select {
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1em;
+      outline: none;
+      cursor: pointer;
+    }
+    
+    .category-select:focus {
+      border-color: #667eea;
+    }
+    
+    .bucket-input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1em;
+      outline: none;
+    }
+    
+    .bucket-input:focus {
+      border-color: #667eea;
+    }
+    
+    .add-btn {
+      padding: 12px 25px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    .add-btn:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    .filter-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    .filter-tab:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+    
+    .filter-tab.active {
+      background: rgba(255, 255, 255, 0.95);
+      color: #667eea;
+      border-color: transparent;
+    }
+    
+    .bucket-list {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: #333;
+    }
+    
+    .bucket-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: #f5f5f5;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      transition: all 0.3s;
+      border-left: 4px solid #667eea;
+    }
+    
+    .bucket-item:hover {
+      background: #ececec;
+      transform: translateX(5px);
+    }
+    
+    .bucket-item.completed {
+      opacity: 0.7;
+      background: #e8f5e9;
+      border-left-color: #2ecc71;
+    }
+    
+    .bucket-item.completed .bucket-text {
+      text-decoration: line-through;
+    }
+    
+    .bucket-checkbox {
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    
+    .bucket-category {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    .category-travel { background: #e3f2fd; color: #1976d2; }
+    .category-adventure { background: #fff3e0; color: #f57c00; }
+    .category-food { background: #fce4ec; color: #c2185b; }
+    .category-learning { background: #f3e5f5; color: #7b1fa2; }
+    .category-romantic { background: #ffebee; color: #d32f2f; }
+    .category-other { background: #e0e0e0; color: #616161; }
+    
+    .bucket-text {
+      flex: 1;
+      font-size: 1.1em;
+      line-height: 1.4;
+    }
+    
+    .bucket-meta {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+    
+    .bucket-author {
+      font-size: 0.85em;
+      color: #999;
+    }
+    
+    .delete-bucket {
+      cursor: pointer;
+      color: #e74c3c;
+      font-size: 1.2em;
+      padding: 5px;
+      transition: all 0.2s;
+    }
+    
+    .delete-bucket:hover {
+      transform: scale(1.2);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #999;
+    }
+    
+    .empty-icon {
+      font-size: 4em;
+      margin-bottom: 15px;
+    }
+    
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .stats-row { grid-template-columns: 1fr; }
+      .input-row { flex-direction: column; }
+      .bucket-item { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-btn">← Back to Hub</a>
+    
+    <header>
+      <h1>🪣 BUCKET LIST</h1>
+      <p class="subtitle">Things we want to do together</p>
+    </header>
+    
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="total-count">0</div>
+        <div class="stat-label">Total Dreams</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="completed-count">0</div>
+        <div class="stat-label">Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="remaining-count">0</div>
+        <div class="stat-label">To Go</div>
+      </div>
+    </div>
+    
+    <div class="add-section">
+      <div class="input-row">
+        <select class="category-select" id="category-select">
+          <option value="travel">✈️ Travel</option>
+          <option value="adventure">🎢 Adventure</option>
+          <option value="food">🍕 Food</option>
+          <option value="learning">📚 Learning</option>
+          <option value="romantic">💕 Romantic</option>
+          <option value="other">✨ Other</option>
+        </select>
+        <input type="text" class="bucket-input" id="bucket-input" placeholder="What do you want to do together?">
+        <button class="add-btn" onclick="addBucketItem()">Add</button>
+      </div>
+    </div>
+    
+    <div class="filter-tabs">
+      <div class="filter-tab active" data-filter="all">All</div>
+      <div class="filter-tab" data-filter="active">Active</div>
+      <div class="filter-tab" data-filter="completed">Completed</div>
+      <div class="filter-tab" data-filter="travel">✈️ Travel</div>
+      <div class="filter-tab" data-filter="adventure">🎢 Adventure</div>
+      <div class="filter-tab" data-filter="food">🍕 Food</div>
+      <div class="filter-tab" data-filter="learning">📚 Learning</div>
+      <div class="filter-tab" data-filter="romantic">💕 Romantic</div>
+      <div class="filter-tab" data-filter="other">✨ Other</div>
+    </div>
+    
+    <div class="bucket-list" id="bucket-list"></div>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem('currentUser') || 'Guest';
+    let bucketItems = JSON.parse(localStorage.getItem('bucketList')) || [];
+    let currentFilter = 'all';
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBucketList();
+      updateStats();
+      
+      // Filter tabs
+      document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          currentFilter = tab.dataset.filter;
+          renderBucketList();
+        });
+      });
+      
+      // Enter key
+      document.getElementById('bucket-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          addBucketItem();
+        }
+      });
+    });
+    
+    function addBucketItem() {
+      const text = document.getElementById('bucket-input').value.trim();
+      const category = document.getElementById('category-select').value;
+      
+      if (!text) return;
+      
+      const item = {
+        id: Date.now(),
+        text: text,
+        category: category,
+        completed: false,
+        author: currentUser,
+        timestamp: new Date().toISOString(),
+        completedDate: null
+      };
+      
+      bucketItems.push(item);
+      saveBucketList();
+      
+      document.getElementById('bucket-input').value = '';
+      renderBucketList();
+      updateStats();
+    }
+    
+    function renderBucketList() {
+      const list = document.getElementById('bucket-list');
+      list.innerHTML = '';
+      
+      // Filter items
+      let filtered = bucketItems;
+      
+      if (currentFilter === 'active') {
+        filtered = bucketItems.filter(item => !item.completed);
+      } else if (currentFilter === 'completed') {
+        filtered = bucketItems.filter(item => item.completed);
+      } else if (currentFilter !== 'all') {
+        filtered = bucketItems.filter(item => item.category === currentFilter);
+      }
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🪣</div>
+            <div style="font-size: 1.2em;">No items ${currentFilter !== 'all' ? 'in this category' : 'yet'}</div>
+            <div style="margin-top: 10px;">Start adding your dreams!</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort: incomplete first, then by date
+      filtered.sort((a, b) => {
+        if (a.completed === b.completed) {
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        }
+        return a.completed ? 1 : -1;
+      });
+      
+      filtered.forEach(item => {
+        const itemEl = document.createElement('div');
+        itemEl.className = `bucket-item ${item.completed ? 'completed' : ''}`;
+        
+        const categoryIcons = {
+          travel: '✈️',
+          adventure: '🎢',
+          food: '🍕',
+          learning: '📚',
+          romantic: '💕',
+          other: '✨'
+        };
+        
+        itemEl.innerHTML = `
+          <input type="checkbox" class="bucket-checkbox" ${item.completed ? 'checked' : ''} 
+                 onchange="toggleBucketItem(${item.id})">
+          <div class="bucket-category category-${item.category}">
+            ${categoryIcons[item.category]} ${item.category}
+          </div>
+          <div class="bucket-text">${item.text}</div>
+          <div class="bucket-meta">
+            <span class="bucket-author">${item.author}</span>
+            ${item.completed && item.completedDate ? 
+              `<span class="bucket-author">✓ ${new Date(item.completedDate).toLocaleDateString()}</span>` 
+              : ''}
+            <span class="delete-bucket" onclick="deleteBucketItem(${item.id})">🗑️</span>
+          </div>
+        `;
+        
+        list.appendChild(itemEl);
+      });
+    }
+    
+    function toggleBucketItem(id) {
+      const item = bucketItems.find(i => i.id === id);
+      if (item) {
+        item.completed = !item.completed;
+        item.completedDate = item.completed ? new Date().toISOString() : null;
+        saveBucketList();
+        renderBucketList();
+        updateStats();
+        
+        if (item.completed) {
+          // Celebration!
+          setTimeout(() => {
+            alert('🎉 Congratulations! You completed: ' + item.text);
+          }, 300);
+        }
+      }
+    }
+    
+    function deleteBucketItem(id) {
+      if (confirm('Delete this item from your bucket list?')) {
+        bucketItems = bucketItems.filter(i => i.id !== id);
+        saveBucketList();
+        renderBucketList();
+        updateStats();
+      }
+    }
+    
+    function updateStats() {
+      const total = bucketItems.length;
+      const completed = bucketItems.filter(i => i.completed).length;
+      const remaining = total - completed;
+      
+      document.getElementById('total-count').textContent = total;
+      document.getElementById('completed-count').textContent = completed;
+      document.getElementById('remaining-count').textContent = remaining;
+    }
+    
+    function saveBucketList() {
+      localStorage.setItem('bucketList', JSON.stringify(bucketItems));
+    }
+  </script>
+</body>
+</html>

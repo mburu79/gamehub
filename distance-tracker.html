@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distance Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-family: 'Righteous', cursive;
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+    
+    .main-content {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: #333;
+    }
+    
+    .distance-display {
+      text-align: center;
+      padding: 40px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border-radius: 20px;
+      margin-bottom: 30px;
+      color: white;
+    }
+    
+    .distance-value {
+      font-family: 'Righteous', cursive;
+      font-size: 4em;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .distance-label {
+      font-size: 1.5em;
+      opacity: 0.9;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      margin-top: 15px;
+      font-size: 1.1em;
+    }
+    
+    .status-indicator.active {
+      background: #2ecc71;
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .info-card {
+      background: #f5f5f5;
+      padding: 20px;
+      border-radius: 15px;
+      text-align: center;
+    }
+    
+    .info-card-icon {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+    
+    .info-card-label {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .info-card-value {
+      font-size: 1.5em;
+      font-weight: 700;
+      color: #667eea;
+    }
+    
+    #map {
+      width: 100%;
+      height: 500px;
+      border-radius: 15px;
+      background: #e0e0e0;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .map-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: #666;
+      text-align: center;
+      padding: 40px;
+    }
+    
+    .map-placeholder-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+    }
+    
+    .enable-location-btn {
+      padding: 15px 30px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1.1em;
+      font-weight: 600;
+      margin-top: 20px;
+      transition: all 0.3s;
+    }
+    
+    .enable-location-btn:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+    
+    .coordinates {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .coordinate-box {
+      background: #f5f5f5;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    
+    .coordinate-title {
+      font-weight: 600;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+    
+    .coordinate-value {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+    .back-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .error-message {
+      background: #e74c3c;
+      color: white;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+    
+    .loading-spinner {
+      display: inline-block;
+      width: 50px;
+      height: 50px;
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .distance-value { font-size: 2.5em; }
+      .coordinates { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-btn">← Back to Hub</a>
+    
+    <header>
+      <h1>🗺️ DISTANCE TRACKER</h1>
+      <p class="subtitle">See how far apart we are</p>
+    </header>
+    
+    <div class="main-content">
+      <div id="error-container"></div>
+      
+      <div class="distance-display">
+        <div class="distance-label">Distance from Home</div>
+        <div class="distance-value" id="distance-value">--</div>
+        <div class="status-indicator" id="status-indicator">
+          📍 Getting location...
+        </div>
+      </div>
+      
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="info-card-icon">⏱️</div>
+          <div class="info-card-label">Estimated Travel Time</div>
+          <div class="info-card-value" id="travel-time">--</div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-card-icon">🚗</div>
+          <div class="info-card-label">Driving Distance</div>
+          <div class="info-card-value" id="driving-distance">--</div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-card-icon">📐</div>
+          <div class="info-card-label">Direct Line</div>
+          <div class="info-card-value" id="direct-distance">--</div>
+        </div>
+        
+        <div class="info-card">
+          <div class="info-card-icon">🧭</div>
+          <div class="info-card-label">Direction</div>
+          <div class="info-card-value" id="direction">--</div>
+        </div>
+      </div>
+      
+      <div id="map">
+        <div class="map-placeholder">
+          <div class="map-placeholder-icon">🌍</div>
+          <h3>Live Location Tracking</h3>
+          <p>Click below to enable location services and see the map</p>
+          <button class="enable-location-btn" onclick="requestLocation()">
+            📍 Enable Location
+          </button>
+        </div>
+      </div>
+      
+      <div class="coordinates">
+        <div class="coordinate-box">
+          <div class="coordinate-title">🏠 Home (Mburu)</div>
+          <div class="coordinate-value">
+            Latitude: -1.1610228<br>
+            Longitude: 36.9792616
+          </div>
+        </div>
+        
+        <div class="coordinate-box">
+          <div class="coordinate-title">📍 Current Location</div>
+          <div class="coordinate-value" id="current-coords">
+            Waiting for location...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const HOME_LAT = -1.1610228;
+    const HOME_LON = 36.9792616;
+    
+    let watchId = null;
+    let currentPosition = null;
+    
+    // Request location on page load if previously granted
+    if (localStorage.getItem('locationPermission') === 'granted') {
+      requestLocation();
+    }
+    
+    function requestLocation() {
+      if (!navigator.geolocation) {
+        showError('Geolocation is not supported by your browser');
+        return;
+      }
+      
+      const statusEl = document.getElementById('status-indicator');
+      statusEl.textContent = '📍 Getting location...';
+      statusEl.classList.remove('active');
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          localStorage.setItem('locationPermission', 'granted');
+          startTracking();
+        },
+        (error) => {
+          handleLocationError(error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
+        }
+      );
+    }
+    
+    function startTracking() {
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+      }
+      
+      watchId = navigator.geolocation.watchPosition(
+        updateLocation,
+        handleLocationError,
+        {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 1000
+        }
+      );
+    }
+    
+    function updateLocation(position) {
+      currentPosition = position;
+      
+      const lat = position.coords.latitude;
+      const lon = position.coords.longitude;
+      
+      // Update current coordinates display
+      document.getElementById('current-coords').innerHTML = `
+        Latitude: ${lat.toFixed(6)}<br>
+        Longitude: ${lon.toFixed(6)}
+      `;
+      
+      // Calculate distance
+      const distance = calculateDistance(HOME_LAT, HOME_LON, lat, lon);
+      
+      // Update distance display
+      const distanceEl = document.getElementById('distance-value');
+      if (distance < 1) {
+        distanceEl.textContent = `${(distance * 1000).toFixed(0)} m`;
+      } else {
+        distanceEl.textContent = `${distance.toFixed(2)} km`;
+      }
+      
+      // Update direct distance
+      document.getElementById('direct-distance').textContent = `${distance.toFixed(2)} km`;
+      
+      // Calculate driving distance (approximately 1.3x direct distance for roads)
+      const drivingDist = (distance * 1.3).toFixed(2);
+      document.getElementById('driving-distance').textContent = `${drivingDist} km`;
+      
+      // Estimate travel time (assuming 50 km/h average)
+      const travelMinutes = Math.round((drivingDist / 50) * 60);
+      if (travelMinutes < 60) {
+        document.getElementById('travel-time').textContent = `${travelMinutes} min`;
+      } else {
+        const hours = Math.floor(travelMinutes / 60);
+        const mins = travelMinutes % 60;
+        document.getElementById('travel-time').textContent = `${hours}h ${mins}m`;
+      }
+      
+      // Calculate direction
+      const bearing = calculateBearing(HOME_LAT, HOME_LON, lat, lon);
+      document.getElementById('direction').textContent = getDirection(bearing);
+      
+      // Update status
+      const statusEl = document.getElementById('status-indicator');
+      statusEl.textContent = '✓ Location Active';
+      statusEl.classList.add('active');
+      
+      // Update map
+      updateMap(lat, lon, distance);
+      
+      // Clear any errors
+      document.getElementById('error-container').innerHTML = '';
+    }
+    
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371; // Earth's radius in km
+      const dLat = toRad(lat2 - lat1);
+      const dLon = toRad(lon2 - lon1);
+      
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const distance = R * c;
+      
+      return distance;
+    }
+    
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+      const dLon = toRad(lon2 - lon1);
+      const y = Math.sin(dLon) * Math.cos(toRad(lat2));
+      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+                Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(dLon);
+      const bearing = toDeg(Math.atan2(y, x));
+      
+      return (bearing + 360) % 360;
+    }
+    
+    function getDirection(bearing) {
+      const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      const index = Math.round(bearing / 45) % 8;
+      return directions[index];
+    }
+    
+    function toRad(degrees) {
+      return degrees * Math.PI / 180;
+    }
+    
+    function toDeg(radians) {
+      return radians * 180 / Math.PI;
+    }
+    
+    function updateMap(lat, lon, distance) {
+      const mapEl = document.getElementById('map');
+      
+      // Create a simple visual map representation
+      mapEl.innerHTML = `
+        <div style="position: relative; width: 100%; height: 100%; background: linear-gradient(135deg, #e3f2fd, #f3e5f5); display: flex; align-items: center; justify-content: center;">
+          <div style="text-align: center;">
+            <div style="font-size: 4em; margin-bottom: 20px;">🏠</div>
+            <div style="font-size: 2em; color: #667eea; font-weight: 600;">Home Base</div>
+            <div style="margin: 20px 0; font-size: 2em; color: #999;">↕️</div>
+            <div style="font-size: 3em; margin-bottom: 20px;">📍</div>
+            <div style="font-size: 2em; color: #764ba2; font-weight: 600;">Your Location</div>
+            <div style="margin-top: 30px; padding: 15px 30px; background: white; border-radius: 15px; display: inline-block;">
+              <div style="font-size: 1.2em; color: #666;">Distance Apart</div>
+              <div style="font-size: 2em; color: #667eea; font-weight: 700; margin-top: 10px;">${distance.toFixed(2)} km</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Note: For a real map implementation, you would integrate Google Maps or Leaflet
+      // This is a simplified visual representation
+    }
+    
+    function handleLocationError(error) {
+      let message = '';
+      
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          message = 'Location permission denied. Please enable location services in your browser settings.';
+          break;
+        case error.POSITION_UNAVAILABLE:
+          message = 'Location information unavailable. Please check your device settings.';
+          break;
+        case error.TIMEOUT:
+          message = 'Location request timed out. Please try again.';
+          break;
+        default:
+          message = 'An unknown error occurred while getting your location.';
+      }
+      
+      showError(message);
+      
+      const statusEl = document.getElementById('status-indicator');
+      statusEl.textContent = '❌ Location Error';
+      statusEl.classList.remove('active');
+    }
+    
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      errorContainer.innerHTML = `
+        <div class="error-message">
+          ⚠️ ${message}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

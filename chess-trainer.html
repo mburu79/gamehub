@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chess - AI Trainer</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Crimson+Text:wght@400;600&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Crimson Text', serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #f5f5f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 30px;
+      align-items: start;
+    }
+    
+    .game-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8em;
+      margin-bottom: 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #f5f5f5, #a8a8a8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 4px 20px rgba(255,255,255,0.1);
+    }
+    
+    #board { 
+      display: grid;
+      grid-template-columns: repeat(8, 70px);
+      border: 12px solid #3a2f1e;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.6),
+                  inset 0 0 0 2px #8b7355;
+      border-radius: 8px;
+      background: #1a1a1a;
+    }
+    
+    .square { 
+      width: 70px;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      position: relative;
+    }
+    
+    .light { background: #f0d9b5; }
+    .dark { background: #b58863; }
+    
+    .square:hover:not(.selected) { 
+      transform: scale(1.05);
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.2);
+    }
+    
+    .selected { 
+      background: rgba(255, 215, 0, 0.6) !important;
+      box-shadow: inset 0 0 30px rgba(255, 215, 0, 0.8);
+    }
+    
+    .possible::after { 
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: rgba(76, 175, 80, 0.5);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.3); opacity: 0.8; }
+    }
+    
+    .piece { 
+      display: inline-block;
+      line-height: 1;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+    }
+    .piece.white { color: #fff; }
+    .piece.black { color: #1a1a1a; }
+
+    .sidebar {
+      background: rgba(30, 30, 30, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    #status { 
+      font-size: 1.4em;
+      margin-bottom: 20px;
+      font-weight: 600;
+      text-align: center;
+      padding: 15px;
+      background: linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(33, 150, 243, 0.2));
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .mode-selector {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .mode-btn {
+      padding: 12px;
+      font-size: 1.05em;
+      font-family: 'Crimson Text', serif;
+      cursor: pointer;
+      background: rgba(255,255,255,0.05);
+      color: #f5f5f5;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    .mode-btn:hover { 
+      background: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(255,255,255,0.1);
+    }
+    
+    .mode-btn.active { 
+      background: linear-gradient(135deg, #4CAF50, #2196F3);
+      border-color: transparent;
+      box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+    }
+    
+    .trainer-panel {
+      background: rgba(40, 40, 40, 0.6);
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 15px;
+      border: 1px solid rgba(76, 175, 80, 0.3);
+    }
+    
+    .trainer-panel h3 {
+      font-family: 'Playfair Display', serif;
+      color: #4CAF50;
+      margin-bottom: 12px;
+      font-size: 1.3em;
+    }
+    
+    .trainer-panel p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      color: #e0e0e0;
+    }
+    
+    .hint-btn, .controls button {
+      padding: 12px 20px;
+      margin: 5px;
+      font-size: 1em;
+      font-family: 'Crimson Text', serif;
+      cursor: pointer;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    .hint-btn:hover, .controls button:hover { 
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+    
+    .controls {
+      display: grid;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    
+    select {
+      padding: 10px;
+      font-size: 1em;
+      font-family: 'Crimson Text', serif;
+      background: rgba(255,255,255,0.1);
+      color: #f5f5f5;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    
+    .move-history {
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.95em;
+    }
+    
+    .move-history::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .move-history::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 4px;
+    }
+    
+    .move-history::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+    }
+    
+    @media (max-width: 1000px) {
+      .container {
+        grid-template-columns: 1fr;
+      }
+      #board {
+        grid-template-columns: repeat(8, 50px);
+      }
+      .square { width: 50px; height: 50px; font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="game-section">
+      <h1>♔ Chess Trainer ♚</h1>
+      <div id="board"></div>
+    </div>
+    
+    <div class="sidebar">
+      <div id="status">Your Turn (White)</div>
+      
+      <div class="mode-selector">
+        <button class="mode-btn active" data-mode="trainer">🎓 Trainer Mode</button>
+        <button class="mode-btn" data-mode="ai">🤖 vs AI</button>
+        <button class="mode-btn" data-mode="2player">👥 2 Player</button>
+      </div>
+      
+      <div id="trainerPanel" class="trainer-panel">
+        <h3>AI Trainer</h3>
+        <p id="trainerAdvice">Make a move and I'll help you learn!</p>
+        <button class="hint-btn" id="getHint">💡 Get Hint</button>
+      </div>
+      
+      <div class="controls">
+        <select id="playerColor">
+          <option value="white" selected>Play as White</option>
+          <option value="black">Play as Black</option>
+        </select>
+        <select id="aiLevel">
+          <option value="easy">AI: Easy</option>
+          <option value="medium" selected>AI: Medium</option>
+          <option value="hard">AI: Hard</option>
+        </select>
+        <button id="undo">↶ Undo Move</button>
+        <button id="newGame">🎮 New Game</button>
+      </div>
+      
+      <div class="move-history" id="moveHistory"></div>
+    </div>
+  </div>
+
+  <script>
+    const chess = new Chess();
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    const trainerPanel = document.getElementById('trainerPanel');
+    const trainerAdvice = document.getElementById('trainerAdvice');
+    const moveHistoryEl = document.getElementById('moveHistory');
+    
+    let selectedSquare = null;
+    let mode = 'trainer';
+    let aiDifficulty = 'medium';
+    let userColor = 'w';
+    let isAiThinking = false;
+    let moveHistory = [];
+
+    const pieceSymbols = {
+      'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔',
+      'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚'
+    };
+    
+    const pieceNames = {
+      'p': 'Pawn', 'n': 'Knight', 'b': 'Bishop', 'r': 'Rook', 'q': 'Queen', 'k': 'King'
+    };
+
+    function renderBoard(highlightMoves = []) {
+      boardEl.innerHTML = '';
+      const ranks = (userColor === 'w') ? [7,6,5,4,3,2,1,0] : [0,1,2,3,4,5,6,7];
+      const files = (userColor === 'w') ? [0,1,2,3,4,5,6,7] : [7,6,5,4,3,2,1,0];
+
+      for (const rank of ranks) {
+        for (const file of files) {
+          const square = String.fromCharCode(97 + file) + (rank + 1);
+          const sqEl = document.createElement('div');
+          sqEl.className = `square ${(file + rank) % 2 === 0 ? 'light' : 'dark'}`;
+          
+          const piece = chess.get(square);
+          if (piece) {
+            const key = piece.color === 'w' ? piece.type.toUpperCase() : piece.type.toLowerCase();
+            sqEl.innerHTML = `<span class="piece ${piece.color === 'w' ? 'white' : 'black'}">${pieceSymbols[key]}</span>`;
+          }
+
+          if (square === selectedSquare) sqEl.classList.add('selected');
+          if (highlightMoves.includes(square)) sqEl.classList.add('possible');
+
+          sqEl.onclick = () => handleSquareClick(square);
+          boardEl.appendChild(sqEl);
+        }
+      }
+      updateStatus();
+    }
+
+    function handleSquareClick(square) {
+      if (isAiThinking || (mode !== '2player' && mode !== 'trainer' && chess.turn() !== userColor)) return;
+
+      const piece = chess.get(square);
+
+      if (selectedSquare) {
+        const move = chess.move({ from: selectedSquare, to: square, promotion: 'q' });
+        if (move) {
+          moveHistory.push(move);
+          updateMoveHistory();
+          selectedSquare = null;
+          renderBoard();
+          
+          if (mode === 'trainer') {
+            provideTrainerFeedback(move);
+          }
+          
+          if (!chess.game_over() && mode !== '2player' && mode !== 'trainer') {
+            triggerAi();
+          }
+          return;
+        }
+      }
+
+      if (piece && piece.color === chess.turn()) {
+        selectedSquare = square;
+        const moves = chess.moves({ square, verbose: true }).map(m => m.to);
+        renderBoard(moves);
+      } else {
+        selectedSquare = null;
+        renderBoard();
+      }
+    }
+
+    function provideTrainerFeedback(move) {
+      const feedback = [];
+      
+      // Basic move description
+      const pieceName = pieceNames[move.piece];
+      feedback.push(`You moved your ${pieceName} from ${move.from} to ${move.to}.`);
+      
+      // Check if it was a capture
+      if (move.captured) {
+        feedback.push(`Good! You captured their ${pieceNames[move.captured]}.`);
+      }
+      
+      // Check if it puts opponent in check
+      if (chess.in_check()) {
+        feedback.push(`Excellent! You put your opponent in check! ♔`);
+      }
+      
+      // Evaluate if it was a good move
+      const score = evaluateLastMove();
+      if (score > 100) {
+        feedback.push(`This was a strong move! You gained material advantage.`);
+      } else if (score < -100) {
+        feedback.push(`⚠️ This move might have weakened your position. Consider protecting your pieces.`);
+      } else {
+        feedback.push(`Solid move. Keep developing your pieces!`);
+      }
+      
+      trainerAdvice.innerHTML = feedback.join(' ');
+    }
+
+    function evaluateLastMove() {
+      const values = { p:100, n:320, b:330, r:500, q:900, k:20000 };
+      let score = 0;
+      chess.SQUARES.forEach(s => {
+        const p = chess.get(s);
+        if (p) score += (p.color === 'w' ? 1 : -1) * values[p.type];
+      });
+      return score;
+    }
+
+    function getHint() {
+      const moves = chess.moves({ verbose: true });
+      if (moves.length === 0) return;
+      
+      // Get best move
+      let bestMove = moves[0];
+      let bestScore = chess.turn() === 'w' ? -Infinity : Infinity;
+      
+      for (const m of moves) {
+        chess.move(m);
+        const score = evaluateBoard();
+        chess.undo();
+        if ((chess.turn() === 'w' && score > bestScore) || (chess.turn() === 'b' && score < bestScore)) {
+          bestScore = score;
+          bestMove = m;
+        }
+      }
+      
+      const hint = `💡 Try moving your ${pieceNames[bestMove.piece]} from ${bestMove.from} to ${bestMove.to}`;
+      if (bestMove.captured) {
+        trainerAdvice.innerHTML = hint + ` - this will capture their ${pieceNames[bestMove.captured]}!`;
+      } else {
+        trainerAdvice.innerHTML = hint + ` - this is a strong strategic move.`;
+      }
+    }
+
+    function triggerAi() {
+      isAiThinking = true;
+      statusEl.textContent = "AI is thinking...";
+      setTimeout(() => {
+        const difficulty = aiDifficulty === 'hard' ? 3 : aiDifficulty === 'medium' ? 2 : 1;
+        const move = difficulty > 1 ? getMinimaxMove(difficulty) : getGreedyMove();
+        if (move) {
+          chess.move(move);
+          moveHistory.push(move);
+          updateMoveHistory();
+        }
+        isAiThinking = false;
+        renderBoard();
+      }, 500);
+    }
+
+    function evaluateBoard() {
+      const values = { p:100, n:320, b:330, r:500, q:900, k:20000 };
+      let score = 0;
+      chess.SQUARES.forEach(s => {
+        const p = chess.get(s);
+        if (p) score += (p.color === 'w' ? 1 : -1) * values[p.type];
+      });
+      return score;
+    }
+
+    function getGreedyMove() {
+      const moves = chess.moves({ verbose: true });
+      if (moves.length === 0) return null;
+      
+      let bestMove = moves[0];
+      let bestScore = chess.turn() === 'w' ? -Infinity : Infinity;
+
+      for (const m of moves) {
+        chess.move(m);
+        const score = evaluateBoard();
+        chess.undo();
+        if ((chess.turn() === 'w' && score > bestScore) || (chess.turn() === 'b' && score < bestScore)) {
+          bestScore = score;
+          bestMove = m;
+        }
+      }
+      return bestMove;
+    }
+
+    function minimax(depth, alpha, beta, isMaximizing) {
+      if (depth === 0 || chess.game_over()) return evaluateBoard();
+      const moves = chess.moves();
+      if (isMaximizing) {
+        let maxEval = -Infinity;
+        for (const m of moves) {
+          chess.move(m);
+          maxEval = Math.max(maxEval, minimax(depth - 1, alpha, beta, false));
+          chess.undo();
+          alpha = Math.max(alpha, maxEval);
+          if (beta <= alpha) break;
+        }
+        return maxEval;
+      } else {
+        let minEval = Infinity;
+        for (const m of moves) {
+          chess.move(m);
+          minEval = Math.min(minEval, minimax(depth - 1, alpha, beta, true));
+          chess.undo();
+          beta = Math.min(beta, minEval);
+          if (beta <= alpha) break;
+        }
+        return minEval;
+      }
+    }
+
+    function getMinimaxMove(depth) {
+      const moves = chess.moves({ verbose: true });
+      if (moves.length === 0) return null;
+      
+      let bestMove = null;
+      let bestValue = chess.turn() === 'w' ? -Infinity : Infinity;
+      const isMaximizingPlayer = chess.turn() === 'w';
+
+      for (const m of moves) {
+        chess.move(m);
+        const val = minimax(depth - 1, -Infinity, Infinity, !isMaximizingPlayer);
+        chess.undo();
+        
+        if (isMaximizingPlayer) {
+          if (val > bestValue) {
+            bestValue = val;
+            bestMove = m;
+          }
+        } else {
+          if (val < bestValue) {
+            bestValue = val;
+            bestMove = m;
+          }
+        }
+      }
+      return bestMove;
+    }
+
+    function updateStatus() {
+      if (chess.game_over()) {
+        if (chess.in_checkmate()) {
+          statusEl.textContent = "Checkmate! Game Over.";
+        } else {
+          statusEl.textContent = "Draw!";
+        }
+      } else {
+        const turn = chess.turn() === 'w' ? "White" : "Black";
+        const side = (mode === '2player') ? "" : (chess.turn() === userColor ? "(You)" : "(AI)");
+        statusEl.textContent = `${turn}'s Turn ${side} ${chess.in_check() ? "- Check!" : ""}`;
+      }
+    }
+    
+    function updateMoveHistory() {
+      moveHistoryEl.innerHTML = '<strong>Move History:</strong><br>';
+      moveHistory.forEach((m, i) => {
+        const color = i % 2 === 0 ? 'White' : 'Black';
+        moveHistoryEl.innerHTML += `${Math.floor(i/2) + 1}. ${color}: ${m.from} → ${m.to}<br>`;
+      });
+      moveHistoryEl.scrollTop = moveHistoryEl.scrollHeight;
+    }
+
+    function resetGame() {
+      chess.reset();
+      selectedSquare = null;
+      isAiThinking = false;
+      moveHistory = [];
+      updateMoveHistory();
+      trainerAdvice.innerHTML = "Make a move and I'll help you learn!";
+      renderBoard();
+      if (mode !== '2player' && mode !== 'trainer' && userColor === 'b') triggerAi();
+    }
+
+    // Event listeners
+    document.getElementById('newGame').onclick = resetGame;
+    document.getElementById('undo').onclick = () => { 
+      chess.undo(); 
+      moveHistory.pop();
+      if(mode !== '2player' && mode !== 'trainer') {
+        chess.undo();
+        moveHistory.pop();
+      }
+      updateMoveHistory();
+      renderBoard(); 
+    };
+    document.getElementById('playerColor').onchange = (e) => { 
+      userColor = e.target.value === 'white' ? 'w' : 'b';
+      resetGame();
+    };
+    document.getElementById('aiLevel').onchange = (e) => aiDifficulty = e.target.value;
+    document.getElementById('getHint').onclick = getHint;
+    
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.onclick = (e) => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        mode = btn.dataset.mode;
+        trainerPanel.style.display = mode === 'trainer' ? 'block' : 'none';
+        resetGame();
+      };
+    });
+
+    resetGame();
+  </script>
+</body>
+</html>

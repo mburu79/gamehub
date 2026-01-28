@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Photo Gallery - Our Memories</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #fff;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      font-family: 'Righteous', cursive;
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+    
+    .upload-section {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      color: #333;
+    }
+    
+    .upload-area {
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .upload-area:hover {
+      background: rgba(102, 126, 234, 0.1);
+      border-color: #764ba2;
+    }
+    
+    .upload-icon {
+      font-size: 4em;
+      margin-bottom: 15px;
+    }
+    
+    .upload-text {
+      font-size: 1.2em;
+      color: #666;
+      margin-bottom: 10px;
+    }
+    
+    .upload-hint {
+      font-size: 0.9em;
+      color: #999;
+    }
+    
+    #file-input {
+      display: none;
+    }
+    
+    .caption-input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 1em;
+      margin-top: 15px;
+      outline: none;
+    }
+    
+    .caption-input:focus {
+      border-color: #667eea;
+    }
+    
+    .upload-btn {
+      padding: 12px 30px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1em;
+      margin-top: 15px;
+      transition: all 0.3s;
+    }
+    
+    .upload-btn:hover {
+      background: #764ba2;
+      transform: translateY(-2px);
+    }
+    
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 25px;
+    }
+    
+    .photo-card {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+    
+    .photo-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+    }
+    
+    .photo-img {
+      width: 100%;
+      height: 300px;
+      object-fit: cover;
+      display: block;
+    }
+    
+    .photo-info {
+      padding: 20px;
+      color: #333;
+    }
+    
+    .photo-caption {
+      font-size: 1.1em;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    
+    .photo-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9em;
+      color: #999;
+      margin-top: 10px;
+    }
+    
+    .photo-author {
+      font-weight: 600;
+      color: #667eea;
+    }
+    
+    .delete-photo {
+      cursor: pointer;
+      color: #e74c3c;
+      font-size: 1.2em;
+      padding: 5px 10px;
+      transition: all 0.2s;
+    }
+    
+    .delete-photo:hover {
+      transform: scale(1.2);
+    }
+    
+    .back-btn {
+      display: inline-block;
+      padding: 10px 20px;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      transition: all 0.3s;
+    }
+    
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: translateY(-2px);
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 80px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+    }
+    
+    .empty-icon {
+      font-size: 5em;
+      margin-bottom: 20px;
+    }
+    
+    .empty-text {
+      font-size: 1.5em;
+      margin-bottom: 10px;
+    }
+    
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .lightbox.active {
+      display: flex;
+    }
+    
+    .lightbox-content {
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+    }
+    
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: 10px;
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      font-size: 2em;
+      color: white;
+      cursor: pointer;
+      background: rgba(255,255,255,0.1);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .lightbox-caption {
+      position: absolute;
+      bottom: -60px;
+      left: 0;
+      right: 0;
+      color: white;
+      text-align: center;
+      font-size: 1.2em;
+    }
+    
+    @media (max-width: 768px) {
+      h1 { font-size: 2em; }
+      .gallery-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="back-btn">← Back to Hub</a>
+    
+    <header>
+      <h1>📸 PHOTO GALLERY</h1>
+      <p class="subtitle">Our memories together</p>
+    </header>
+    
+    <div class="upload-section">
+      <div class="upload-area" onclick="document.getElementById('file-input').click()">
+        <div class="upload-icon">📷</div>
+        <div class="upload-text">Click to upload a photo</div>
+        <div class="upload-hint">Supported formats: JPG, PNG, GIF</div>
+      </div>
+      <input type="file" id="file-input" accept="image/*" multiple onchange="handleFiles(this.files)">
+      <input type="text" id="caption-input" class="caption-input" placeholder="Add a caption (optional)" style="display: none;">
+      <button class="upload-btn" id="upload-btn" style="display: none;" onclick="uploadPhotos()">Upload Photos</button>
+    </div>
+    
+    <div class="gallery-grid" id="gallery-grid"></div>
+  </div>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+      <div class="lightbox-close" onclick="closeLightbox()">×</div>
+      <img class="lightbox-img" id="lightbox-img" src="">
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <script>
+    const currentUser = localStorage.getItem('currentUser') || 'Guest';
+    let photos = JSON.parse(localStorage.getItem('photoGallery')) || [];
+    let pendingFiles = [];
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      renderGallery();
+    });
+    
+    function handleFiles(files) {
+      if (files.length === 0) return;
+      
+      pendingFiles = Array.from(files);
+      document.getElementById('caption-input').style.display = 'block';
+      document.getElementById('upload-btn').style.display = 'block';
+      
+      // Show preview count
+      const uploadText = document.querySelector('.upload-text');
+      uploadText.textContent = `${files.length} photo${files.length > 1 ? 's' : ''} selected`;
+    }
+    
+    function uploadPhotos() {
+      const caption = document.getElementById('caption-input').value.trim();
+      
+      if (pendingFiles.length === 0) return;
+      
+      pendingFiles.forEach(file => {
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+          const photo = {
+            id: Date.now() + Math.random(),
+            dataUrl: e.target.result,
+            caption: caption,
+            author: currentUser,
+            timestamp: new Date().toISOString()
+          };
+          
+          photos.push(photo);
+          savePhotos();
+          renderGallery();
+        };
+        
+        reader.readAsDataURL(file);
+      });
+      
+      // Reset
+      pendingFiles = [];
+      document.getElementById('file-input').value = '';
+      document.getElementById('caption-input').value = '';
+      document.getElementById('caption-input').style.display = 'none';
+      document.getElementById('upload-btn').style.display = 'none';
+      
+      const uploadText = document.querySelector('.upload-text');
+      uploadText.textContent = 'Click to upload a photo';
+    }
+    
+    function renderGallery() {
+      const grid = document.getElementById('gallery-grid');
+      grid.innerHTML = '';
+      
+      if (photos.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-icon">📷</div>
+            <div class="empty-text">No photos yet!</div>
+            <div>Upload your first memory above</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Sort by newest first
+      photos.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      photos.forEach(photo => {
+        const card = document.createElement('div');
+        card.className = 'photo-card';
+        
+        const date = new Date(photo.timestamp).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+        
+        card.innerHTML = `
+          <img class="photo-img" src="${photo.dataUrl}" alt="${photo.caption || 'Photo'}" onclick="openLightbox('${photo.dataUrl}', '${photo.caption}', '${photo.author}', '${date}')">
+          <div class="photo-info">
+            ${photo.caption ? `<div class="photo-caption">${photo.caption}</div>` : ''}
+            <div class="photo-meta">
+              <div>
+                <span class="photo-author">${photo.author}</span> • ${date}
+              </div>
+              <span class="delete-photo" onclick="deletePhoto(${photo.id})">🗑️</span>
+            </div>
+          </div>
+        `;
+        
+        grid.appendChild(card);
+      });
+    }
+    
+    function openLightbox(dataUrl, caption, author, date) {
+      document.getElementById('lightbox-img').src = dataUrl;
+      document.getElementById('lightbox-caption').textContent = 
+        caption ? `${caption} - ${author} (${date})` : `${author} (${date})`;
+      document.getElementById('lightbox').classList.add('active');
+    }
+    
+    function closeLightbox() {
+      document.getElementById('lightbox').classList.remove('active');
+    }
+    
+    function deletePhoto(id) {
+      if (confirm('Delete this photo?')) {
+        photos = photos.filter(p => p.id !== id);
+        savePhotos();
+        renderGallery();
+      }
+    }
+    
+    function savePhotos() {
+      // Note: LocalStorage has a 5-10MB limit, so we should warn users
+      try {
+        localStorage.setItem('photoGallery', JSON.stringify(photos));
+      } catch (e) {
+        alert('Storage limit reached! Please delete some old photos to add new ones.');
+      }
+    }
+    
+    // Keyboard navigation for lightbox
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeLightbox();
+      }
+    });
+  </script>
+</body>
+</html>
