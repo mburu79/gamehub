@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic-Tac-Toe Multiplayer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      color: #fff;
+    }
+    .container { max-width: 550px; width: 100%; text-align: center; }
+    h1 { font-family: 'Fredoka One', cursive; font-size: 3em; margin-bottom: 10px; }
+    #board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 30px auto; max-width: 450px; padding: 20px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border-radius: 20px; }
+    .cell { aspect-ratio: 1; background: rgba(255, 255, 255, 0.95); border-radius: 15px; display: flex; align-items: center; justify-content: center; font-family: 'Fredoka One', cursive; font-size: 4em; cursor: pointer; transition: all 0.3s; }
+    .cell:hover:not(.taken) { transform: scale(1.05); }
+    .cell.x { color: #e74c3c; }
+    .cell.o { color: #3498db; }
+    #status { font-size: 1.5em; font-weight: 700; margin: 20px 0; padding: 15px; background: rgba(255, 255, 255, 0.2); border-radius: 50px; }
+    button { padding: 12px 25px; font-size: 1em; font-weight: 700; cursor: pointer; background: rgba(255, 255, 255, 0.95); color: #667eea; border: none; border-radius: 50px; margin: 5px; }
+    .waiting { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎮 TIC-TAC-TOE</h1>
+    <p>Multiplayer Mode</p>
+    <div id="status">Connecting...</div>
+    <div id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
+    <button onclick="newGame()">🔄 New Game</button>
+    <button onclick="location.href='index.html'">← Back</button>
+  </div>
+
+  <script type="module">
+    import { database } from './firebase-config.js';
+    import { ref, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+    const currentUser = localStorage.getItem('currentUsername') || 'mburu';
+    const cells = document.querySelectorAll('.cell');
+    const statusEl = document.getElementById('status');
+    const gameRef = ref(database, 'games/tictactoe');
+
+    let mySymbol = currentUser === 'mburu' ? 'X' : 'O';
+    let gameState = { board: Array(9).fill(''), currentTurn: 'X', winner: null };
+
+    // Listen for game updates
+    onValue(gameRef, (snapshot) => {
+      if (snapshot.exists()) {
+        gameState = snapshot.val();
+        updateBoard();
+        updateStatus();
+      }
+    });
+
+    cells.forEach(cell => {
+      cell.addEventListener('click', () => {
+        const index = cell.dataset.index;
+        if (gameState.board[index] || gameState.winner || gameState.currentTurn !== mySymbol) return;
+        
+        gameState.board[index] = mySymbol;
+        gameState.currentTurn = mySymbol === 'X' ? 'O' : 'X';
+        
+        const winner = checkWinner();
+        if (winner) gameState.winner = winner;
+        
+        update(gameRef, gameState);
+      });
+    });
+
+    function updateBoard() {
+      cells.forEach((cell, i) => {
+        cell.textContent = gameState.board[i];
+        cell.className = 'cell' + (gameState.board[i] ? ' taken ' + gameState.board[i].toLowerCase() : '');
+      });
+    }
+
+    function updateStatus() {
+      if (gameState.winner === 'draw') {
+        statusEl.textContent = "It's a Draw! 🤝";
+      } else if (gameState.winner) {
+        const winnerName = gameState.winner === 'X' ? 'Mburu' : 'Gatete';
+        statusEl.textContent = `${winnerName} Wins! 🎉`;
+      } else if (gameState.currentTurn === mySymbol) {
+        statusEl.textContent = "Your Turn";
+        statusEl.className = '';
+      } else {
+        statusEl.textContent = "Waiting for opponent...";
+        statusEl.className = 'waiting';
+      }
+    }
+
+    function checkWinner() {
+      const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+      for (let w of wins) {
+        if (gameState.board[w[0]] && gameState.board[w[0]] === gameState.board[w[1]] && gameState.board[w[1]] === gameState.board[w[2]]) {
+          return gameState.board[w[0]];
+        }
+      }
+      return gameState.board.every(c => c) ? 'draw' : null;
+    }
+
+    window.newGame = function() {
+      set(gameRef, { board: Array(9).fill(''), currentTurn: 'X', winner: null });
+    };
+
+    // Initialize game if empty
+    setTimeout(() => {
+      if (!gameState.board || gameState.board.every(c => !c)) {
+        window.newGame();
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

@@ -3,764 +3,154 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Game Hub</title>
+  <title>Game Hub - Home</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600&display=swap');
-    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-      font-family: 'Poppins', sans-serif;
-      background: 
-        radial-gradient(circle at 20% 50%, rgba(120, 40, 200, 0.15), transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(200, 40, 120, 0.15), transparent 40%),
-        linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
-      min-height: 100vh;
-      color: #fff;
-      overflow-x: hidden;
-    }
-    
-    .stars {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-    }
-    
-    .star {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: white;
-      border-radius: 50%;
-      animation: twinkle 4s infinite;
-    }
-    
-    @keyframes twinkle {
-      0%, 100% { opacity: 0.3; }
-      50% { opacity: 1; }
-    }
-    
-    header {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 20px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-    }
-    
-    .logo {
-      font-family: 'Righteous', cursive;
-      font-size: 2.5em;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .user-actions {
-      display: flex;
-      gap: 15px;
-      align-items: center;
-    }
-    
-    .user-name {
-      color: #b8b8d1;
-      font-size: 1.1em;
-    }
-    
-    .header-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      padding: 10px 20px;
-      border-radius: 10px;
-      color: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-      font-size: 0.9em;
-    }
-    
-    .header-btn:hover {
-      background: rgba(102, 126, 234, 0.3);
-      border-color: rgba(102, 126, 234, 0.5);
-      transform: translateY(-2px);
-    }
-    
-    .logout-btn {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border: none;
-    }
-    
-    .subtitle {
-      font-size: 1.3em;
-      color: #b8b8d1;
-      font-weight: 300;
-      letter-spacing: 2px;
-      text-align: center;
-      margin: 40px 0;
-    }
-    
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 40px 20px;
-    }
-    
-    .game-card {
-      background: rgba(255, 255, 255, 0.03);
-      backdrop-filter: blur(10px);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 35px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .game-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-      transition: left 0.5s;
-    }
-    
-    .game-card:hover::before {
-      left: 100%;
-    }
-    
-    .game-card:hover {
-      transform: translateY(-10px) scale(1.02);
-      border-color: rgba(102, 126, 234, 0.6);
-      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
-    }
-    
-    .game-icon {
-      font-size: 5em;
-      margin-bottom: 20px;
-      filter: drop-shadow(0 5px 15px rgba(0,0,0,0.3));
-      animation: float 3s ease-in-out infinite;
-    }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    
-    .game-card:nth-child(1) .game-icon { animation-delay: 0s; }
-    .game-card:nth-child(2) .game-icon { animation-delay: 0.2s; }
-    .game-card:nth-child(3) .game-icon { animation-delay: 0.4s; }
-    .game-card:nth-child(4) .game-icon { animation-delay: 0.6s; }
-    .game-card:nth-child(5) .game-icon { animation-delay: 0.8s; }
-    .game-card:nth-child(6) .game-icon { animation-delay: 1s; }
-    
-    .game-title {
-      font-family: 'Righteous', cursive;
-      font-size: 1.8em;
-      margin-bottom: 15px;
-      background: linear-gradient(135deg, #fff, #b8b8d1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    
-    .game-desc {
-      color: #b8b8d1;
-      font-size: 0.95em;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 6px 16px;
-      border-radius: 20px;
-      font-size: 0.8em;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
-    
-    .status-ready {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: white;
-    }
-    
-    .status-coming {
-      background: linear-gradient(135deg, #f59e0b, #d97706);
-      color: white;
-    }
-    
-    .features {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 15px;
-      flex-wrap: wrap;
-    }
-    
-    .feature-tag {
-      background: rgba(102, 126, 234, 0.2);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-size: 0.75em;
-      border: 1px solid rgba(102, 126, 234, 0.3);
-    }
-    
-    .section-header {
-      text-align: center;
-      margin: 60px 0 30px;
-      grid-column: 1 / -1;
-    }
-    
-    .section-title {
-      font-family: 'Righteous', cursive;
-      font-size: 2.5em;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      margin-bottom: 10px;
-    }
-    
-    .section-desc {
-      color: #b8b8d1;
-      font-size: 1.1em;
-    }
-    
-    footer {
-      text-align: center;
-      padding: 40px 20px;
-      color: #666;
-      font-size: 0.9em;
-    }
-    
-    /* Settings Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    
-    .modal.active {
-      display: flex;
-    }
-    
-    .modal-content {
-      background: rgba(26, 26, 46, 0.98);
-      backdrop-filter: blur(20px);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 500px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-    
-    .modal-title {
-      font-family: 'Righteous', cursive;
-      font-size: 2em;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .close-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: white;
-      font-size: 1.5em;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-    
-    .close-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-      transform: rotate(90deg);
-    }
-    
-    .form-group {
-      margin-bottom: 20px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: #b8b8d1;
-      font-size: 0.9em;
-      font-weight: 600;
-    }
-    
-    .form-group input {
-      width: 100%;
-      padding: 12px;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      color: white;
-      font-size: 1em;
-      font-family: 'Poppins', sans-serif;
-      transition: all 0.3s;
-    }
-    
-    .form-group input:focus {
-      outline: none;
-      border-color: rgba(102, 126, 234, 0.6);
-      background: rgba(255, 255, 255, 0.08);
-    }
-    
-    .save-btn {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 1.1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-top: 10px;
-    }
-    
-    .save-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
-    }
-    
-    .success-message {
-      background: rgba(16, 185, 129, 0.2);
-      border: 1px solid rgba(16, 185, 129, 0.4);
-      color: #10b981;
-      padding: 12px;
-      border-radius: 10px;
-      margin-top: 15px;
-      display: none;
-    }
-    
-    .success-message.show {
-      display: block;
-    }
-    
-    .info-text {
-      color: #888;
-      font-size: 0.85em;
-      margin-top: 5px;
-    }
-    
-    @media (max-width: 768px) {
-      h1 { font-size: 3em; }
-      .game-grid { grid-template-columns: 1fr; }
-    }
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #fff; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 40px; }
+    h1 { font-family: 'Righteous', cursive; font-size: 4em; margin-bottom: 10px; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); }
+    .welcome { font-size: 1.3em; opacity: 0.9; }
+    .section { margin-bottom: 40px; }
+    .section-title { font-size: 2em; margin-bottom: 20px; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; text-align: center; color: #333; transition: all 0.3s; cursor: pointer; box-shadow: 0 10px 30px rgba(0,0,0,0.2); text-decoration: none; display: block; }
+    .card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+    .card-icon { font-size: 4em; margin-bottom: 15px; }
+    .card-title { font-size: 1.5em; font-weight: 700; margin-bottom: 10px; color: #667eea; }
+    .card-desc { font-size: 0.95em; color: #666; }
+    .badge { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; font-weight: 600; }
+    .logout-btn { position: fixed; top: 20px; right: 20px; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; border: none; border-radius: 10px; cursor: pointer; }
+    .new-tag { background: #2ecc71; color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.7em; margin-left: 5px; }
   </style>
 </head>
 <body>
+  <button class="logout-btn" onclick="logout()">🚪 Logout</button>
 
-  <div class="stars" id="stars"></div>
+  <div class="container">
+    <header>
+      <h1>🎮 GAME HUB</h1>
+      <p class="welcome">Welcome, <span id="username">User</span>!</p>
+    </header>
 
-  <header>
-    <div class="logo">💕 Game Hub</div>
-    <div class="user-actions">
-      <span class="user-name">👋 <span id="currentUserName"></span></span>
-      <button class="header-btn" onclick="openSettings()">⚙️ Settings</button>
-      <button class="header-btn logout-btn" onclick="logout()">Logout</button>
-    </div>
-  </header>
-
-  <div class="subtitle">For Mburu & Gatete</div>
-
-  <div class="game-grid">
-    
-    <!-- Couple Features Section Header -->
-    <div class="section-header">
+    <div class="section">
       <h2 class="section-title">💕 Couple Features</h2>
-      <p class="section-desc">Stay connected and create memories together</p>
-    </div>
-    
-    <!-- Couple Features Section -->
-    <div class="game-card" onclick="openGame('love-notes.html')">
-      <div class="game-icon">💌</div>
-      <div class="game-title">Love Notes</div>
-      <div class="game-desc">Random romantic messages and custom love notes for each other</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Random Messages</span>
-        <span class="feature-tag">Custom Notes</span>
-        <span class="feature-tag">Save</span>
+      <div class="grid">
+        <a href="reminders.html" class="card" style="position: relative;">
+          <span class="new-tag">NEW!</span>
+          <div class="card-icon">📬</div>
+          <div class="card-title">Reminders</div>
+          <div class="card-desc">SMS & Email reminders for both</div>
+        </a>
+        <a href="love-notes.html" class="card">
+          <div class="card-icon">💕</div>
+          <div class="card-title">Love Notes</div>
+          <div class="card-desc">Sweet messages for each other</div>
+        </a>
+        <a href="countdown.html" class="card">
+          <div class="card-icon">⏰</div>
+          <div class="card-title">Countdown</div>
+          <div class="card-desc">Count down to special dates</div>
+        </a>
+        <a href="photo-gallery.html" class="card">
+          <div class="card-icon">📸</div>
+          <div class="card-title">Photos</div>
+          <div class="card-desc">Share memories together</div>
+        </a>
+        <a href="bucket-list.html" class="card">
+          <div class="card-icon">🪣</div>
+          <div class="card-title">Bucket List</div>
+          <div class="card-desc">Dreams to achieve together</div>
+        </a>
       </div>
     </div>
 
-    <div class="game-card" onclick="openGame('countdown.html')">
-      <div class="game-icon">⏰</div>
-      <div class="game-title">Countdown Timer</div>
-      <div class="game-desc">Create countdowns to special dates, anniversaries, and trips</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Live Timer</span>
-        <span class="feature-tag">Events</span>
-        <span class="feature-tag">Celebrate</span>
+    <div class="section">
+      <h2 class="section-title">🎮 Multiplayer Games</h2>
+      <div class="grid">
+        <a href="tic-tac-toe-multiplayer.html" class="card" style="position: relative;">
+          <span class="new-tag">MULTIPLAYER!</span>
+          <div class="card-icon">⭕</div>
+          <div class="card-title">Tic-Tac-Toe</div>
+          <div class="card-desc">Play together in real-time</div>
+        </a>
+        <a href="tic-tac-toe.html" class="card">
+          <div class="card-icon">❌</div>
+          <div class="card-title">Tic-Tac-Toe (AI)</div>
+          <div class="card-desc">Classic game vs AI</div>
+        </a>
+        <a href="draughts.html" class="card">
+          <div class="card-icon">🔴</div>
+          <div class="card-title">Draughts</div>
+          <div class="card-desc">Checkers game</div>
+        </a>
+        <a href="chess-trainer.html" class="card">
+          <div class="card-icon">♟️</div>
+          <div class="card-title">Chess</div>
+          <div class="card-desc">Learn and play chess</div>
+        </a>
       </div>
     </div>
 
-    <div class="game-card" onclick="openGame('photo-gallery.html')">
-      <div class="game-icon">📸</div>
-      <div class="game-title">Photo Gallery</div>
-      <div class="game-desc">Upload and share photos with captions and dates</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Upload Photos</span>
-        <span class="feature-tag">Captions</span>
-        <span class="feature-tag">Lightbox</span>
+    <div class="section">
+      <h2 class="section-title">🧩 Puzzle Games</h2>
+      <div class="grid">
+        <a href="wordle.html" class="card">
+          <div class="card-icon">🔤</div>
+          <div class="card-title">Wordle</div>
+          <div class="card-desc">Guess the 5-letter word</div>
+        </a>
+        <a href="sudoku.html" class="card">
+          <div class="card-icon">🔢</div>
+          <div class="card-title">Sudoku</div>
+          <div class="card-desc">Number puzzle challenge</div>
+        </a>
+        <a href="crossword.html" class="card">
+          <div class="card-icon">📝</div>
+          <div class="card-title">Crossword</div>
+          <div class="card-desc">Word puzzle fun</div>
+        </a>
       </div>
     </div>
 
-    <div class="game-card" onclick="openGame('bucket-list.html')">
-      <div class="game-icon">✈️</div>
-      <div class="game-title">Bucket List</div>
-      <div class="game-desc">Track things you want to do together with categories</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Categories</span>
-        <span class="feature-tag">Check Off</span>
-        <span class="feature-tag">Stats</span>
+    <div class="section">
+      <h2 class="section-title">🛠️ Tools</h2>
+      <div class="grid">
+        <a href="whiteboard.html" class="card">
+          <div class="card-icon">🎨</div>
+          <div class="card-title">Whiteboard</div>
+          <div class="card-desc">Notes, drawings, messages</div>
+        </a>
+        <a href="planner.html" class="card">
+          <div class="card-icon">📅</div>
+          <div class="card-title">Planner</div>
+          <div class="card-desc">Calendar & to-do lists</div>
+        </a>
+        <a href="distance-tracker.html" class="card">
+          <div class="card-icon">🗺️</div>
+          <div class="card-title">Distance</div>
+          <div class="card-desc">See how far apart we are</div>
+        </a>
       </div>
-    </div>
-
-    <!-- Games Section Header -->
-    <div class="section-header">
-      <h2 class="section-title">🎮 Games</h2>
-      <p class="section-desc">Challenge yourself and have fun</p>
-    </div>
-
-    <!-- Games Section -->
-    <div class="game-card" onclick="openGame('chess-trainer.html')">
-      <div class="game-icon">♔</div>
-      <div class="game-title">Chess Trainer</div>
-      <div class="game-desc">Learn chess with AI guidance, get hints, and improve your strategy</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">AI Trainer</span>
-        <span class="feature-tag">Hints</span>
-        <span class="feature-tag">vs AI</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('draughts.html')">
-      <div class="game-icon">⚫</div>
-      <div class="game-title">Draughts</div>
-      <div class="game-desc">Classic checkers with smart AI opponent and 2-player mode</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">AI Opponent</span>
-        <span class="feature-tag">2 Player</span>
-        <span class="feature-tag">3 Levels</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('tic-tac-toe.html')">
-      <div class="game-icon">⭕</div>
-      <div class="game-title">Tic-Tac-Toe</div>
-      <div class="game-desc">Quick and fun! Challenge the AI or play with a friend</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Unbeatable AI</span>
-        <span class="feature-tag">2 Player</span>
-        <span class="feature-tag">Stats</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('wordle.html')">
-      <div class="game-icon">🔤</div>
-      <div class="game-title">Wordle</div>
-      <div class="game-desc">Guess the 5-letter word in 6 tries with color-coded hints</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Word Game</span>
-        <span class="feature-tag">Stats Tracking</span>
-        <span class="feature-tag">Daily Play</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('sudoku.html')">
-      <div class="game-icon">🔢</div>
-      <div class="game-title">Sudoku</div>
-      <div class="game-desc">Classic number puzzle with three difficulty levels</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">3 Difficulties</span>
-        <span class="feature-tag">Hints</span>
-        <span class="feature-tag">Timer</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('crossword.html')">
-      <div class="game-icon">📰</div>
-      <div class="game-title">Crossword</div>
-      <div class="game-desc">Solve word puzzles with across and down clues</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Multiple Puzzles</span>
-        <span class="feature-tag">Hints</span>
-        <span class="feature-tag">Check Answers</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="alert('Coming soon! This will have multiplayer chess & draughts.')">
-      <div class="game-icon">🌐</div>
-      <div class="game-title">Multiplayer Room</div>
-      <div class="game-desc">Play online with friends - share a link and compete in real-time</div>
-      <span class="status-badge status-coming">COMING SOON</span>
-      <div class="features">
-        <span class="feature-tag">Online Play</span>
-        <span class="feature-tag">Share Link</span>
-        <span class="feature-tag">Real-time</span>
-      </div>
-    </div>
-
-    <!-- Productivity Tools Section Header -->
-    <div class="section-header">
-      <h2 class="section-title">🛠️ Productivity Tools</h2>
-      <p class="section-desc">Stay organized and collaborate</p>
-    </div>
-
-    <div class="game-card" onclick="openGame('whiteboard.html')">
-      <div class="game-icon">📝</div>
-      <div class="game-title">Whiteboard</div>
-      <div class="game-desc">Shared digital whiteboard for notes, sketches, and collaboration</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Drawing</span>
-        <span class="feature-tag">Text Notes</span>
-        <span class="feature-tag">Messages</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('planner.html')">
-      <div class="game-icon">📅</div>
-      <div class="game-title">Planner</div>
-      <div class="game-desc">Stay organized with tasks, reminders, and shared planning</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Tasks</span>
-        <span class="feature-tag">Calendar</span>
-        <span class="feature-tag">Events</span>
-      </div>
-    </div>
-
-    <div class="game-card" onclick="openGame('distance-tracker.html')">
-      <div class="game-icon">🗺️</div>
-      <div class="game-title">Distance Tracker</div>
-      <div class="game-desc">See how far you are from home with live location tracking</div>
-      <span class="status-badge status-ready">✓ READY</span>
-      <div class="features">
-        <span class="feature-tag">Live GPS</span>
-        <span class="feature-tag">Distance</span>
-        <span class="feature-tag">Direction</span>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Settings Modal -->
-  <div class="modal" id="settingsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">⚙️ Settings</h2>
-        <button class="close-btn" onclick="closeSettings()">×</button>
-      </div>
-      
-      <form id="settingsForm" onsubmit="saveSettings(event)">
-        <div class="form-group">
-          <label>Display Name</label>
-          <input type="text" id="displayName" readonly style="opacity: 0.6;" />
-          <p class="info-text">Your display name cannot be changed</p>
-        </div>
-        
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="email" placeholder="your.email@example.com" />
-          <p class="info-text">Used for email reminders</p>
-        </div>
-        
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="phone" placeholder="+254712345678" />
-          <p class="info-text">Used for SMS reminders (include country code)</p>
-        </div>
-        
-        <div class="form-group">
-          <label>Current Password</label>
-          <input type="password" id="currentPassword" placeholder="Enter current password" />
-        </div>
-        
-        <div class="form-group">
-          <label>New Password (optional)</label>
-          <input type="password" id="newPassword" placeholder="Leave blank to keep current" />
-          <p class="info-text">Only fill this if you want to change your password</p>
-        </div>
-        
-        <button type="submit" class="save-btn">Save Changes</button>
-        
-        <div class="success-message" id="successMessage">
-          ✓ Settings saved successfully!
-        </div>
-      </form>
     </div>
   </div>
-
-  <footer>
-    <p>Built with ❤️ | More games and features coming soon!</p>
-  </footer>
 
   <script>
-    // Generate random stars
-    const starsContainer = document.getElementById('stars');
-    for (let i = 0; i < 100; i++) {
-      const star = document.createElement('div');
-      star.className = 'star';
-      star.style.left = Math.random() * 100 + '%';
-      star.style.top = Math.random() * 100 + '%';
-      star.style.animationDelay = Math.random() * 4 + 's';
-      starsContainer.appendChild(star);
-    }
+    const currentUser = localStorage.getItem('currentUser') || 'Guest';
+    document.getElementById('username').textContent = currentUser;
 
-    // Check if user is logged in
-    const currentUser = localStorage.getItem('currentUser');
-    const currentUsername = localStorage.getItem('currentUsername');
-    
-    if (!currentUser || !currentUsername) {
-      // Not logged in, redirect to login
-      window.location.href = 'login.html';
-    } else {
-      // Check if session is still valid (24 hours)
-      const lastLogin = new Date(localStorage.getItem('loginTime'));
-      const now = new Date();
-      const hoursSince = (now - lastLogin) / (1000 * 60 * 60);
-      
-      if (hoursSince >= 24) {
-        // Session expired
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('currentUsername');
-        localStorage.removeItem('loginTime');
-        window.location.href = 'login.html';
-      } else {
-        // Valid session, display user name
-        document.getElementById('currentUserName').textContent = currentUser;
-      }
-    }
-
-    function openGame(filename) {
-      window.location.href = filename;
-    }
-    
     function logout() {
       localStorage.removeItem('currentUser');
       localStorage.removeItem('currentUsername');
       localStorage.removeItem('loginTime');
       window.location.href = 'login.html';
     }
-    
-    function openSettings() {
-      const modal = document.getElementById('settingsModal');
-      const users = JSON.parse(localStorage.getItem('users'));
-      const user = users[currentUsername];
-      
-      // Populate form with current data
-      document.getElementById('displayName').value = user.displayName;
-      document.getElementById('email').value = user.email || '';
-      document.getElementById('phone').value = user.phone || '';
-      document.getElementById('currentPassword').value = '';
-      document.getElementById('newPassword').value = '';
-      
-      modal.classList.add('active');
+
+    // Check if logged in
+    if (!localStorage.getItem('currentUser')) {
+      window.location.href = 'login.html';
     }
-    
-    function closeSettings() {
-      document.getElementById('settingsModal').classList.remove('active');
-      document.getElementById('successMessage').classList.remove('show');
-    }
-    
-    function saveSettings(event) {
-      event.preventDefault();
-      
-      const users = JSON.parse(localStorage.getItem('users'));
-      const user = users[currentUsername];
-      
-      const currentPassword = document.getElementById('currentPassword').value;
-      const newPassword = document.getElementById('newPassword').value;
-      const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
-      
-      // Verify current password
-      if (currentPassword !== user.password) {
-        alert('Current password is incorrect!');
-        return;
-      }
-      
-      // Update user data
-      user.email = email;
-      user.phone = phone;
-      
-      // Update password if provided
-      if (newPassword) {
-        user.password = newPassword;
-      }
-      
-      // Save back to localStorage
-      users[currentUsername] = user;
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      // Show success message
-      document.getElementById('successMessage').classList.add('show');
-      
-      // Clear password fields
-      document.getElementById('currentPassword').value = '';
-      document.getElementById('newPassword').value = '';
-      
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        document.getElementById('successMessage').classList.remove('show');
-      }, 3000);
-    }
-    
-    // Close modal on backdrop click
-    document.getElementById('settingsModal').addEventListener('click', function(e) {
-      if (e.target === this) {
-        closeSettings();
-      }
-    });
   </script>
 </body>
 </html>

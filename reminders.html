@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reminders</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #fff; }
+    .container { max-width: 900px; margin: 0 auto; }
+    h1 { font-family: 'Righteous', cursive; font-size: 3em; text-align: center; margin-bottom: 30px; }
+    .add-section { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; margin-bottom: 30px; color: #333; }
+    .form-group { margin-bottom: 20px; }
+    label { display: block; margin-bottom: 8px; font-weight: 600; }
+    input, textarea, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 1em; }
+    .reminder-type { display: flex; gap: 10px; margin-bottom: 20px; }
+    .type-btn { flex: 1; padding: 12px; background: #f5f5f5; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.3s; }
+    .type-btn.active { background: #667eea; color: white; border-color: #667eea; }
+    .add-btn { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1.1em; font-weight: 600; }
+    .reminders-list { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; color: #333; }
+    .reminder-item { background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #667eea; }
+    .reminder-title { font-size: 1.3em; font-weight: 700; margin-bottom: 5px; }
+    .reminder-meta { font-size: 0.9em; color: #999; margin-top: 10px; }
+    .delete-btn { float: right; background: #e74c3c; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 10px; margin-bottom: 20px;">← Back</a>
+    
+    <h1>📬 REMINDERS</h1>
+    
+    <div class="add-section">
+      <h2 style="margin-bottom: 20px;">Create New Reminder</h2>
+      
+      <div class="reminder-type">
+        <div class="type-btn active" onclick="selectType('both')" id="type-both">📧📱 Both</div>
+        <div class="type-btn" onclick="selectType('email')" id="type-email">📧 Email Only</div>
+        <div class="type-btn" onclick="selectType('sms')" id="type-sms">📱 SMS Only</div>
+      </div>
+      
+      <div class="form-group">
+        <label>Reminder Title</label>
+        <input type="text" id="title" placeholder="e.g., Date Night">
+      </div>
+      
+      <div class="form-group">
+        <label>Message</label>
+        <textarea id="message" rows="3" placeholder="Don't forget our special date tonight!"></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label>Send To</label>
+        <select id="recipient">
+          <option value="both">Both of Us</option>
+          <option value="mburu">Mburu Only</option>
+          <option value="gatete">Gatete Only</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label>Date & Time</label>
+        <input type="datetime-local" id="datetime">
+      </div>
+      
+      <div class="form-group">
+        <label>Mburu's Phone</label>
+        <input type="tel" id="mburu-phone" placeholder="+254...">
+      </div>
+      
+      <div class="form-group">
+        <label>Gatete's Phone</label>
+        <input type="tel" id="gatete-phone" placeholder="+254...">
+      </div>
+      
+      <div class="form-group">
+        <label>Mburu's Email</label>
+        <input type="email" id="mburu-email" placeholder="mburu@example.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Gatete's Email</label>
+        <input type="email" id="gatete-email" placeholder="gatete@example.com">
+      </div>
+      
+      <button class="add-btn" onclick="createReminder()">🔔 Create Reminder</button>
+    </div>
+    
+    <div class="reminders-list">
+      <h2 style="margin-bottom: 20px;">Upcoming Reminders</h2>
+      <div id="reminders-container"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { database } from './firebase-config.js';
+    import { ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+    let selectedType = 'both';
+    const remindersRef = ref(database, 'reminders');
+
+    // Load saved contact info
+    const contacts = JSON.parse(localStorage.getItem('contacts') || '{}');
+    if (contacts.mburuPhone) document.getElementById('mburu-phone').value = contacts.mburuPhone;
+    if (contacts.gatetePhone) document.getElementById('gatete-phone').value = contacts.gatetePhone;
+    if (contacts.mburuEmail) document.getElementById('mburu-email').value = contacts.mburuEmail;
+    if (contacts.gateteEmail) document.getElementById('gatete-email').value = contacts.gateteEmail;
+
+    window.selectType = function(type) {
+      selectedType = type;
+      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('type-' + type).classList.add('active');
+    };
+
+    window.createReminder = async function() {
+      const title = document.getElementById('title').value;
+      const message = document.getElementById('message').value;
+      const recipient = document.getElementById('recipient').value;
+      const datetime = document.getElementById('datetime').value;
+      const mburuPhone = document.getElementById('mburu-phone').value;
+      const gatetePhone = document.getElementById('gatete-phone').value;
+      const mburuEmail = document.getElementById('mburu-email').value;
+      const gateteEmail = document.getElementById('gatete-email').value;
+
+      if (!title || !message || !datetime) {
+        alert('Please fill in all fields');
+        return;
+      }
+
+      // Save contact info
+      localStorage.setItem('contacts', JSON.stringify({
+        mburuPhone, gatetePhone, mburuEmail, gateteEmail
+      }));
+
+      const reminder = {
+        title, message, recipient, datetime, type: selectedType,
+        contacts: { mburuPhone, gatetePhone, mburuEmail, gateteEmail },
+        createdBy: localStorage.getItem('currentUser'),
+        createdAt: new Date().toISOString()
+      };
+
+      await push(remindersRef, reminder);
+      
+      // Clear form
+      document.getElementById('title').value = '';
+      document.getElementById('message').value = '';
+      document.getElementById('datetime').value = '';
+      
+      alert('✅ Reminder created! We\'ll send it via ' + selectedType);
+    };
+
+    // Listen for reminders
+    onValue(remindersRef, (snapshot) => {
+      const container = document.getElementById('reminders-container');
+      container.innerHTML = '';
+      
+      if (!snapshot.exists()) {
+        container.innerHTML = '<p style="text-align: center; color: #999;">No reminders yet</p>';
+        return;
+      }
+
+      const reminders = [];
+      snapshot.forEach(child => {
+        reminders.push({ id: child.key, ...child.val() });
+      });
+
+      reminders.sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+      reminders.forEach(r => {
+        const date = new Date(r.datetime);
+        const isPast = date < new Date();
+        
+        const div = document.createElement('div');
+        div.className = 'reminder-item';
+        div.style.opacity = isPast ? '0.6' : '1';
+        
+        div.innerHTML = `
+          <button class="delete-btn" onclick="deleteReminder('${r.id}')">🗑️</button>
+          <div class="reminder-title">${r.title}</div>
+          <div>${r.message}</div>
+          <div class="reminder-meta">
+            📅 ${date.toLocaleDateString()} at ${date.toLocaleTimeString()} • 
+            ${r.type === 'both' ? '📧📱 Both' : r.type === 'email' ? '📧 Email' : '📱 SMS'} • 
+            To: ${r.recipient === 'both' ? 'Both' : r.recipient}
+            ${isPast ? ' • ⚠️ Past due' : ''}
+          </div>
+        `;
+        
+        container.appendChild(div);
+      });
+
+      // Check for reminders to send
+      checkReminders(reminders);
+    });
+
+    window.deleteReminder = function(id) {
+      if (confirm('Delete this reminder?')) {
+        remove(ref(database, 'reminders/' + id));
+      }
+    };
+
+    function checkReminders(reminders) {
+      const now = new Date();
+      reminders.forEach(r => {
+        const reminderTime = new Date(r.datetime);
+        const diff = reminderTime - now;
+        
+        // Send if within 1 minute
+        if (diff > 0 && diff < 60000 && !r.sent) {
+          sendReminder(r);
+        }
+      });
+    }
+
+    async function sendReminder(reminder) {
+      console.log('Sending reminder:', reminder);
+      
+      // For SMS: You'd integrate with services like Twilio or Africa's Talking
+      // For Email: You'd integrate with SendGrid or AWS SES
+      // This is a placeholder - actual implementation requires backend
+      
+      alert(`🔔 REMINDER: ${reminder.title}\n${reminder.message}`);
+      
+      // Mark as sent in Firebase
+      // update(ref(database, 'reminders/' + reminder.id), { sent: true });
+    }
+  </script>
+</body>
+</html>
