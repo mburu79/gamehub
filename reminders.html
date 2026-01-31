@@ -3,42 +3,82 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reminders</title>
+  <title>Reminders - Free Email</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #fff; }
     .container { max-width: 900px; margin: 0 auto; }
     h1 { font-family: 'Righteous', cursive; font-size: 3em; text-align: center; margin-bottom: 30px; }
+    .setup-banner { background: #2ecc71; color: white; padding: 20px; border-radius: 15px; margin-bottom: 30px; text-align: center; }
+    .setup-banner.error { background: #e74c3c; }
     .add-section { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; margin-bottom: 30px; color: #333; }
     .form-group { margin-bottom: 20px; }
     label { display: block; margin-bottom: 8px; font-weight: 600; }
     input, textarea, select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 1em; }
-    .reminder-type { display: flex; gap: 10px; margin-bottom: 20px; }
-    .type-btn { flex: 1; padding: 12px; background: #f5f5f5; border: 2px solid #ddd; border-radius: 10px; cursor: pointer; text-align: center; transition: all 0.3s; }
-    .type-btn.active { background: #667eea; color: white; border-color: #667eea; }
     .add-btn { width: 100%; padding: 15px; background: #667eea; color: white; border: none; border-radius: 10px; cursor: pointer; font-size: 1.1em; font-weight: 600; }
+    .add-btn:disabled { background: #ccc; cursor: not-allowed; }
     .reminders-list { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; color: #333; }
-    .reminder-item { background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #667eea; }
+    .reminder-item { background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #667eea; position: relative; }
     .reminder-title { font-size: 1.3em; font-weight: 700; margin-bottom: 5px; }
     .reminder-meta { font-size: 0.9em; color: #999; margin-top: 10px; }
-    .delete-btn { float: right; background: #e74c3c; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+    .delete-btn { position: absolute; top: 10px; right: 10px; background: #e74c3c; color: white; border: none; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+    .status-badge { display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-left: 10px; }
+    .status-pending { background: #f39c12; color: white; }
+    .status-sent { background: #2ecc71; color: white; }
+    .status-failed { background: #e74c3c; color: white; }
+    .setup-steps { background: #f5f5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+    .setup-steps ol { margin-left: 20px; }
+    .setup-steps li { margin-bottom: 10px; }
+    .setup-steps a { color: #667eea; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="container">
     <a href="index.html" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 10px; margin-bottom: 20px;">← Back</a>
     
-    <h1>📬 REMINDERS</h1>
+    <h1>📬 EMAIL REMINDERS</h1>
+    
+    <div id="setup-status" class="setup-banner error">
+      ⚙️ Setup Required - Follow steps below
+    </div>
     
     <div class="add-section">
-      <h2 style="margin-bottom: 20px;">Create New Reminder</h2>
-      
-      <div class="reminder-type">
-        <div class="type-btn active" onclick="selectType('both')" id="type-both">📧📱 Both</div>
-        <div class="type-btn" onclick="selectType('email')" id="type-email">📧 Email Only</div>
-        <div class="type-btn" onclick="selectType('sms')" id="type-sms">📱 SMS Only</div>
+      <div class="setup-steps">
+        <h3>🆓 FREE Setup (One-Time - 5 mins)</h3>
+        <ol>
+          <li>Go to <a href="https://www.emailjs.com" target="_blank">emailjs.com</a> → Sign up FREE</li>
+          <li>Click "Add New Service" → Choose Gmail (or any email)</li>
+          <li>Connect your Gmail → Copy <strong>Service ID</strong></li>
+          <li>Go to "Email Templates" → Create template with: <code>{{to_email}}, {{message}}, {{title}}</code></li>
+          <li>Copy <strong>Template ID</strong></li>
+          <li>Go to "Account" → Copy your <strong>Public Key</strong></li>
+          <li>Paste all 3 below and click Save!</li>
+        </ol>
       </div>
+      
+      <h3 style="margin-bottom: 15px;">📧 EmailJS Configuration</h3>
+      
+      <div class="form-group">
+        <label>Public Key (from EmailJS Account page)</label>
+        <input type="text" id="emailjs-public-key" placeholder="e.g., user_abc123xyz">
+      </div>
+      
+      <div class="form-group">
+        <label>Service ID (from Email Services)</label>
+        <input type="text" id="emailjs-service-id" placeholder="e.g., service_gmail">
+      </div>
+      
+      <div class="form-group">
+        <label>Template ID (from Email Templates)</label>
+        <input type="text" id="emailjs-template-id" placeholder="e.g., template_reminder">
+      </div>
+      
+      <button class="add-btn" onclick="saveEmailJSConfig()">💾 Save Configuration</button>
+    </div>
+    
+    <div class="add-section" id="reminder-form" style="display: none;">
+      <h2 style="margin-bottom: 20px;">Create New Reminder</h2>
       
       <div class="form-group">
         <label>Reminder Title</label>
@@ -65,16 +105,6 @@
       </div>
       
       <div class="form-group">
-        <label>Mburu's Phone</label>
-        <input type="tel" id="mburu-phone" placeholder="+254...">
-      </div>
-      
-      <div class="form-group">
-        <label>Gatete's Phone</label>
-        <input type="tel" id="gatete-phone" placeholder="+254...">
-      </div>
-      
-      <div class="form-group">
         <label>Mburu's Email</label>
         <input type="email" id="mburu-email" placeholder="mburu@example.com">
       </div>
@@ -93,51 +123,77 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
   <script type="module">
     import { database } from './firebase-config.js';
-    import { ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+    import { ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
 
-    let selectedType = 'both';
     const remindersRef = ref(database, 'reminders');
+    let emailjsConfig = JSON.parse(localStorage.getItem('emailjsConfig') || '{}');
+    
+    // Load saved emails
+    const savedEmails = JSON.parse(localStorage.getItem('reminderEmails') || '{}');
+    if (savedEmails.mburu) document.getElementById('mburu-email').value = savedEmails.mburu;
+    if (savedEmails.gatete) document.getElementById('gatete-email').value = savedEmails.gatete;
 
-    // Load saved contact info
-    const contacts = JSON.parse(localStorage.getItem('contacts') || '{}');
-    if (contacts.mburuPhone) document.getElementById('mburu-phone').value = contacts.mburuPhone;
-    if (contacts.gatetePhone) document.getElementById('gatete-phone').value = contacts.gatetePhone;
-    if (contacts.mburuEmail) document.getElementById('mburu-email').value = contacts.mburuEmail;
-    if (contacts.gateteEmail) document.getElementById('gatete-email').value = contacts.gateteEmail;
+    // Check if EmailJS is configured
+    function checkEmailJSConfig() {
+      if (emailjsConfig.publicKey && emailjsConfig.serviceId && emailjsConfig.templateId) {
+        emailjs.init(emailjsConfig.publicKey);
+        document.getElementById('setup-status').className = 'setup-banner';
+        document.getElementById('setup-status').textContent = '✅ EmailJS Configured - Ready to send!';
+        document.getElementById('reminder-form').style.display = 'block';
+        
+        // Load saved config to inputs
+        document.getElementById('emailjs-public-key').value = emailjsConfig.publicKey;
+        document.getElementById('emailjs-service-id').value = emailjsConfig.serviceId;
+        document.getElementById('emailjs-template-id').value = emailjsConfig.templateId;
+        
+        return true;
+      }
+      return false;
+    }
 
-    window.selectType = function(type) {
-      selectedType = type;
-      document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('type-' + type).classList.add('active');
+    window.saveEmailJSConfig = function() {
+      const publicKey = document.getElementById('emailjs-public-key').value.trim();
+      const serviceId = document.getElementById('emailjs-service-id').value.trim();
+      const templateId = document.getElementById('emailjs-template-id').value.trim();
+      
+      if (!publicKey || !serviceId || !templateId) {
+        alert('Please fill in all 3 fields!');
+        return;
+      }
+      
+      emailjsConfig = { publicKey, serviceId, templateId };
+      localStorage.setItem('emailjsConfig', JSON.stringify(emailjsConfig));
+      
+      alert('✅ Configuration saved! You can now create reminders.');
+      checkEmailJSConfig();
     };
 
     window.createReminder = async function() {
-      const title = document.getElementById('title').value;
-      const message = document.getElementById('message').value;
+      const title = document.getElementById('title').value.trim();
+      const message = document.getElementById('message').value.trim();
       const recipient = document.getElementById('recipient').value;
       const datetime = document.getElementById('datetime').value;
-      const mburuPhone = document.getElementById('mburu-phone').value;
-      const gatetePhone = document.getElementById('gatete-phone').value;
-      const mburuEmail = document.getElementById('mburu-email').value;
-      const gateteEmail = document.getElementById('gatete-email').value;
+      const mburuEmail = document.getElementById('mburu-email').value.trim();
+      const gateteEmail = document.getElementById('gatete-email').value.trim();
 
-      if (!title || !message || !datetime) {
+      if (!title || !message || !datetime || !mburuEmail || !gateteEmail) {
         alert('Please fill in all fields');
         return;
       }
 
-      // Save contact info
-      localStorage.setItem('contacts', JSON.stringify({
-        mburuPhone, gatetePhone, mburuEmail, gateteEmail
-      }));
+      // Save emails
+      localStorage.setItem('reminderEmails', JSON.stringify({ mburu: mburuEmail, gatete: gateteEmail }));
 
       const reminder = {
-        title, message, recipient, datetime, type: selectedType,
-        contacts: { mburuPhone, gatetePhone, mburuEmail, gateteEmail },
+        title, message, recipient, datetime,
+        emails: { mburu: mburuEmail, gatete: gateteEmail },
         createdBy: localStorage.getItem('currentUser'),
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        status: 'pending',
+        sent: false
       };
 
       await push(remindersRef, reminder);
@@ -147,7 +203,7 @@
       document.getElementById('message').value = '';
       document.getElementById('datetime').value = '';
       
-      alert('✅ Reminder created! We\'ll send it via ' + selectedType);
+      alert('✅ Reminder created! We\'ll email you at the scheduled time.');
     };
 
     // Listen for reminders
@@ -171,19 +227,28 @@
         const date = new Date(r.datetime);
         const isPast = date < new Date();
         
+        let statusBadge = '';
+        if (r.sent) {
+          statusBadge = '<span class="status-badge status-sent">✓ Sent</span>';
+        } else if (r.status === 'failed') {
+          statusBadge = '<span class="status-badge status-failed">✗ Failed</span>';
+        } else if (isPast) {
+          statusBadge = '<span class="status-badge status-failed">⚠️ Missed</span>';
+        } else {
+          statusBadge = '<span class="status-badge status-pending">⏳ Pending</span>';
+        }
+        
         const div = document.createElement('div');
         div.className = 'reminder-item';
-        div.style.opacity = isPast ? '0.6' : '1';
+        div.style.opacity = (isPast && !r.sent) ? '0.6' : '1';
         
         div.innerHTML = `
           <button class="delete-btn" onclick="deleteReminder('${r.id}')">🗑️</button>
-          <div class="reminder-title">${r.title}</div>
+          <div class="reminder-title">${r.title} ${statusBadge}</div>
           <div>${r.message}</div>
           <div class="reminder-meta">
             📅 ${date.toLocaleDateString()} at ${date.toLocaleTimeString()} • 
-            ${r.type === 'both' ? '📧📱 Both' : r.type === 'email' ? '📧 Email' : '📱 SMS'} • 
             To: ${r.recipient === 'both' ? 'Both' : r.recipient}
-            ${isPast ? ' • ⚠️ Past due' : ''}
           </div>
         `;
         
@@ -191,7 +256,9 @@
       });
 
       // Check for reminders to send
-      checkReminders(reminders);
+      if (checkEmailJSConfig()) {
+        checkAndSendReminders(reminders);
+      }
     });
 
     window.deleteReminder = function(id) {
@@ -200,31 +267,76 @@
       }
     };
 
-    function checkReminders(reminders) {
+    function checkAndSendReminders(reminders) {
       const now = new Date();
+      
       reminders.forEach(r => {
+        if (r.sent) return; // Already sent
+        
         const reminderTime = new Date(r.datetime);
         const diff = reminderTime - now;
         
-        // Send if within 1 minute
-        if (diff > 0 && diff < 60000 && !r.sent) {
-          sendReminder(r);
+        // Send if time has passed (within last 2 minutes) and not sent
+        if (diff < 0 && diff > -120000) {
+          sendEmailReminder(r);
         }
       });
     }
 
-    async function sendReminder(reminder) {
-      console.log('Sending reminder:', reminder);
+    async function sendEmailReminder(reminder) {
+      if (reminder.sent) return;
       
-      // For SMS: You'd integrate with services like Twilio or Africa's Talking
-      // For Email: You'd integrate with SendGrid or AWS SES
-      // This is a placeholder - actual implementation requires backend
-      
-      alert(`🔔 REMINDER: ${reminder.title}\n${reminder.message}`);
-      
-      // Mark as sent in Firebase
-      // update(ref(database, 'reminders/' + reminder.id), { sent: true });
+      const emails = [];
+      if (reminder.recipient === 'both' || reminder.recipient === 'mburu') {
+        emails.push(reminder.emails.mburu);
+      }
+      if (reminder.recipient === 'both' || reminder.recipient === 'gatete') {
+        emails.push(reminder.emails.gatete);
+      }
+
+      try {
+        for (const email of emails) {
+          await emailjs.send(
+            emailjsConfig.serviceId,
+            emailjsConfig.templateId,
+            {
+              to_email: email,
+              title: reminder.title,
+              message: reminder.message,
+              from_name: 'Game Hub Reminders'
+            }
+          );
+        }
+        
+        // Mark as sent
+        await update(ref(database, 'reminders/' + reminder.id), { 
+          sent: true, 
+          status: 'sent',
+          sentAt: new Date().toISOString() 
+        });
+        
+        alert(`✅ Reminder sent: ${reminder.title}`);
+      } catch (error) {
+        console.error('Email send failed:', error);
+        await update(ref(database, 'reminders/' + reminder.id), { 
+          status: 'failed',
+          error: error.message 
+        });
+      }
     }
+
+    // Check every 30 seconds
+    setInterval(() => {
+      onValue(remindersRef, (snapshot) => {
+        if (!snapshot.exists()) return;
+        const reminders = [];
+        snapshot.forEach(child => reminders.push({ id: child.key, ...child.val() }));
+        checkAndSendReminders(reminders);
+      }, { onlyOnce: true });
+    }, 30000);
+
+    // Initial check
+    checkEmailJSConfig();
   </script>
 </body>
 </html>

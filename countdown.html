@@ -3,292 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Countdown - Special Moments</title>
+  <title>Countdown - Synced</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;600;700&display=swap');
-    
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body { 
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-      padding: 20px;
-      color: #fff;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-    }
-    
-    h1 {
-      font-family: 'Righteous', cursive;
-      font-size: 3em;
-      margin-bottom: 10px;
-      text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-    }
-    
-    .subtitle {
-      font-size: 1.2em;
-      opacity: 0.9;
-    }
-    
-    .countdowns-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      margin-bottom: 30px;
-    }
-    
-    .countdown-card {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      color: #333;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .countdown-card::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(45deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-      transform: rotate(45deg);
-      animation: shine 3s infinite;
-    }
-    
-    @keyframes shine {
-      0%, 100% { transform: rotate(45deg) translateX(-100%); }
-      50% { transform: rotate(45deg) translateX(100%); }
-    }
-    
-    .countdown-icon {
-      font-size: 3em;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-    
-    .countdown-title {
-      font-size: 1.5em;
-      font-weight: 700;
-      margin-bottom: 10px;
-      color: #667eea;
-      text-align: center;
-    }
-    
-    .countdown-date {
-      font-size: 0.9em;
-      color: #999;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    
-    .countdown-display {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-bottom: 15px;
-    }
-    
-    .time-unit {
-      text-align: center;
-      background: #f5f5f5;
-      padding: 15px 10px;
-      border-radius: 10px;
-    }
-    
-    .time-value {
-      font-size: 2em;
-      font-weight: 700;
-      color: #667eea;
-    }
-    
-    .time-label {
-      font-size: 0.8em;
-      color: #999;
-      text-transform: uppercase;
-      margin-top: 5px;
-    }
-    
-    .countdown-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 15px;
-    }
-    
-    .action-btn {
-      padding: 8px 15px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: all 0.3s;
-    }
-    
-    .action-btn:hover {
-      background: #764ba2;
-      transform: translateY(-2px);
-    }
-    
-    .action-btn.delete {
-      background: #e74c3c;
-    }
-    
-    .action-btn.delete:hover {
-      background: #c0392b;
-    }
-    
-    .add-countdown-section {
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      padding: 30px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      color: #333;
-    }
-    
-    .section-title {
-      font-size: 1.8em;
-      font-weight: 700;
-      margin-bottom: 20px;
-      color: #667eea;
-      text-align: center;
-    }
-    
-    .form-grid {
-      display: grid;
-      gap: 15px;
-    }
-    
-    .form-group {
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .form-group label {
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #555;
-    }
-    
-    .form-group input, .form-group select {
-      padding: 12px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      font-family: 'Poppins', sans-serif;
-      font-size: 1em;
-      outline: none;
-    }
-    
-    .form-group input:focus, .form-group select:focus {
-      border-color: #667eea;
-    }
-    
-    .emoji-picker {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 10px;
-      margin-top: 10px;
-    }
-    
-    .emoji-option {
-      font-size: 2em;
-      cursor: pointer;
-      text-align: center;
-      padding: 10px;
-      border-radius: 10px;
-      transition: all 0.2s;
-    }
-    
-    .emoji-option:hover {
-      background: #f5f5f5;
-      transform: scale(1.2);
-    }
-    
-    .emoji-option.selected {
-      background: #667eea;
-      transform: scale(1.1);
-    }
-    
-    .submit-btn {
-      padding: 15px 30px;
-      background: #667eea;
-      color: white;
-      border: none;
-      border-radius: 15px;
-      cursor: pointer;
-      font-size: 1.1em;
-      font-weight: 600;
-      transition: all 0.3s;
-      margin-top: 20px;
-    }
-    
-    .submit-btn:hover {
-      background: #764ba2;
-      transform: translateY(-2px);
-      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
-    }
-    
-    .back-btn {
-      display: inline-block;
-      padding: 10px 20px;
-      background: rgba(255,255,255,0.2);
-      color: white;
-      text-decoration: none;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      transition: all 0.3s;
-    }
-    
-    .back-btn:hover {
-      background: rgba(255,255,255,0.3);
-      transform: translateY(-2px);
-    }
-    
-    .celebration {
-      text-align: center;
-      padding: 20px;
-      background: linear-gradient(135deg, #2ecc71, #27ae60);
-      border-radius: 15px;
-      color: white;
-      font-size: 1.2em;
-      font-weight: 600;
-    }
-    
-    @media (max-width: 768px) {
-      h1 { font-size: 2em; }
-      .countdown-display { grid-template-columns: repeat(2, 1fr); }
-      .emoji-picker { grid-template-columns: repeat(6, 1fr); }
-    }
+    body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: #fff; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    header { text-align: center; margin-bottom: 40px; }
+    h1 { font-family: 'Righteous', cursive; font-size: 3em; margin-bottom: 10px; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); }
+    .countdowns-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; margin-bottom: 30px; }
+    .countdown-card { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); color: #333; }
+    .countdown-icon { font-size: 3em; margin-bottom: 15px; text-align: center; }
+    .countdown-title { font-size: 1.5em; font-weight: 700; margin-bottom: 10px; color: #667eea; text-align: center; }
+    .countdown-date { font-size: 0.9em; color: #999; text-align: center; margin-bottom: 20px; }
+    .countdown-display { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 15px; }
+    .time-unit { text-align: center; background: #f5f5f5; padding: 15px 10px; border-radius: 10px; }
+    .time-value { font-size: 2em; font-weight: 700; color: #667eea; }
+    .time-label { font-size: 0.8em; color: #999; text-transform: uppercase; margin-top: 5px; }
+    .delete-btn { width: 100%; padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 10px; }
+    .add-countdown-section { background: rgba(255, 255, 255, 0.95); border-radius: 20px; padding: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); color: #333; }
+    .form-grid { display: grid; gap: 15px; }
+    .form-group label { margin-bottom: 8px; font-weight: 600; color: #555; display: block; }
+    .form-group input, .form-group select { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 1em; }
+    .emoji-picker { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; margin-top: 10px; }
+    .emoji-option { font-size: 2em; cursor: pointer; text-align: center; padding: 10px; border-radius: 10px; transition: all 0.2s; }
+    .emoji-option.selected { background: #667eea; }
+    .submit-btn { padding: 15px 30px; background: #667eea; color: white; border: none; border-radius: 15px; cursor: pointer; font-size: 1.1em; font-weight: 600; margin-top: 20px; width: 100%; }
+    .celebration { text-align: center; padding: 20px; background: linear-gradient(135deg, #2ecc71, #27ae60); border-radius: 15px; color: white; font-size: 1.2em; font-weight: 600; }
+    .sync-badge { background: #2ecc71; color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8em; }
+    .back-btn { display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.2); color: white; text-decoration: none; border-radius: 10px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-
   <div class="container">
     <a href="index.html" class="back-btn">← Back to Hub</a>
     
     <header>
-      <h1>⏰ COUNTDOWNS</h1>
-      <p class="subtitle">Counting down to our special moments</p>
+      <h1>⏰ COUNTDOWNS <span class="sync-badge">🔄 Synced</span></h1>
+      <p style="font-size: 1.2em; opacity: 0.9;">Counting down to our special moments</p>
     </header>
     
     <div class="countdowns-grid" id="countdowns-grid"></div>
     
     <div class="add-countdown-section">
-      <div class="section-title">➕ Add New Countdown</div>
+      <h2 style="text-align: center; margin-bottom: 20px; color: #667eea;">➕ Add New Countdown</h2>
       
       <div class="form-grid">
         <div class="form-group">
@@ -311,96 +69,77 @@
     </div>
   </div>
 
-  <script>
-    const emojis = ['🎂', '💑', '💍', '🌹', '🎁', '✈️', '🏖️', '🎉', '💝', '🎊', '🌟', '💐', '🍾', '🎈', '❤️', '💕'];
+  <script type="module">
+    import { database } from './firebase-config.js';
+    import { ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js";
+
+    const emojis = ['🎂', '💍', '💒', '🌹', '🎁', '✈️', '🖖', '🎉', '💎', '🎊', '🌟', '💕', '🥂', '🎈', '❤️', '💕'];
+    const countdownsRef = ref(database, 'countdowns');
     let selectedEmoji = '🎉';
-    let countdowns = JSON.parse(localStorage.getItem('countdowns')) || [];
-    
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-      renderEmojiPicker();
-      renderCountdowns();
-      
-      // Set min date to today
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('event-date').min = today;
-      
-      // Update countdowns every second
-      setInterval(renderCountdowns, 1000);
-    });
-    
-    function renderEmojiPicker() {
-      const picker = document.getElementById('emoji-picker');
-      
-      emojis.forEach(emoji => {
-        const option = document.createElement('div');
-        option.className = 'emoji-option';
-        option.textContent = emoji;
-        if (emoji === selectedEmoji) {
-          option.classList.add('selected');
-        }
-        
-        option.addEventListener('click', () => {
-          document.querySelectorAll('.emoji-option').forEach(o => o.classList.remove('selected'));
-          option.classList.add('selected');
-          selectedEmoji = emoji;
-        });
-        
-        picker.appendChild(option);
+    let countdowns = [];
+
+    // Render emoji picker
+    const picker = document.getElementById('emoji-picker');
+    emojis.forEach(emoji => {
+      const option = document.createElement('div');
+      option.className = 'emoji-option';
+      option.textContent = emoji;
+      if (emoji === selectedEmoji) option.classList.add('selected');
+      option.addEventListener('click', () => {
+        document.querySelectorAll('.emoji-option').forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        selectedEmoji = emoji;
       });
-    }
-    
-    function addCountdown() {
+      picker.appendChild(option);
+    });
+
+    // Set min date to today
+    document.getElementById('event-date').min = new Date().toISOString().split('T')[0];
+
+    // Listen for countdowns
+    onValue(countdownsRef, (snapshot) => {
+      countdowns = [];
+      if (snapshot.exists()) {
+        snapshot.forEach(child => {
+          countdowns.push({ id: child.key, ...child.val() });
+        });
+      }
+      renderCountdowns();
+    });
+
+    // Update every second
+    setInterval(renderCountdowns, 1000);
+
+    window.addCountdown = async function() {
       const name = document.getElementById('event-name').value.trim();
       const date = document.getElementById('event-date').value;
       
-      if (!name || !date) {
-        alert('Please fill in all fields!');
-        return;
-      }
+      if (!name || !date) return alert('Please fill in all fields!');
       
-      const countdown = {
-        id: Date.now(),
-        name: name,
-        date: date,
+      await push(countdownsRef, {
+        name, date,
         icon: selectedEmoji,
         createdBy: localStorage.getItem('currentUser') || 'Guest',
         timestamp: new Date().toISOString()
-      };
-      
-      countdowns.push(countdown);
-      saveCountdowns();
+      });
       
       document.getElementById('event-name').value = '';
       document.getElementById('event-date').value = '';
-      
-      renderCountdowns();
-    }
-    
+    };
+
     function renderCountdowns() {
       const grid = document.getElementById('countdowns-grid');
       grid.innerHTML = '';
       
       if (countdowns.length === 0) {
-        grid.innerHTML = `
-          <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px;">
-            <div style="font-size: 4em; margin-bottom: 20px;">📅</div>
-            <div style="font-size: 1.5em;">No countdowns yet!</div>
-            <div style="font-size: 1em; opacity: 0.8; margin-top: 10px;">Add your first special date below</div>
-          </div>
-        `;
+        grid.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.1); border-radius: 20px;"><div style="font-size: 4em;">📅</div><div style="font-size: 1.5em; margin-top: 10px;">No countdowns yet!</div></div>';
         return;
       }
       
-      // Sort by date
       countdowns.sort((a, b) => new Date(a.date) - new Date(b.date));
-      
-      countdowns.forEach(countdown => {
-        const card = createCountdownCard(countdown);
-        grid.appendChild(card);
-      });
+      countdowns.forEach(c => grid.appendChild(createCountdownCard(c)));
     }
-    
+
     function createCountdownCard(countdown) {
       const card = document.createElement('div');
       card.className = 'countdown-card';
@@ -410,15 +149,12 @@
       const diff = targetDate - now;
       
       if (diff <= 0) {
-        // Event has passed or is today
         card.innerHTML = `
           <div class="countdown-icon">${countdown.icon}</div>
           <div class="countdown-title">${countdown.name}</div>
           <div class="countdown-date">${formatDate(countdown.date)}</div>
           <div class="celebration">🎉 It's Here! 🎉</div>
-          <div class="countdown-actions">
-            <button class="action-btn delete" onclick="deleteCountdown(${countdown.id})">Delete</button>
-          </div>
+          <button class="delete-btn" onclick="deleteCountdown('${countdown.id}')">Delete</button>
         `;
         return card;
       }
@@ -433,51 +169,24 @@
         <div class="countdown-title">${countdown.name}</div>
         <div class="countdown-date">${formatDate(countdown.date)}</div>
         <div class="countdown-display">
-          <div class="time-unit">
-            <div class="time-value">${days}</div>
-            <div class="time-label">Days</div>
-          </div>
-          <div class="time-unit">
-            <div class="time-value">${hours}</div>
-            <div class="time-label">Hours</div>
-          </div>
-          <div class="time-unit">
-            <div class="time-value">${minutes}</div>
-            <div class="time-label">Mins</div>
-          </div>
-          <div class="time-unit">
-            <div class="time-value">${seconds}</div>
-            <div class="time-label">Secs</div>
-          </div>
+          <div class="time-unit"><div class="time-value">${days}</div><div class="time-label">Days</div></div>
+          <div class="time-unit"><div class="time-value">${hours}</div><div class="time-label">Hours</div></div>
+          <div class="time-unit"><div class="time-value">${minutes}</div><div class="time-label">Mins</div></div>
+          <div class="time-unit"><div class="time-value">${seconds}</div><div class="time-label">Secs</div></div>
         </div>
-        <div class="countdown-actions">
-          <button class="action-btn delete" onclick="deleteCountdown(${countdown.id})">Delete</button>
-        </div>
+        <button class="delete-btn" onclick="deleteCountdown('${countdown.id}')">Delete</button>
       `;
       
       return card;
     }
-    
+
     function formatDate(dateStr) {
-      const date = new Date(dateStr + 'T00:00:00');
-      return date.toLocaleDateString('en-US', { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      });
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
     }
-    
-    function deleteCountdown(id) {
-      if (confirm('Delete this countdown?')) {
-        countdowns = countdowns.filter(c => c.id !== id);
-        saveCountdowns();
-        renderCountdowns();
-      }
-    }
-    
-    function saveCountdowns() {
-      localStorage.setItem('countdowns', JSON.stringify(countdowns));
-    }
+
+    window.deleteCountdown = async function(id) {
+      if (confirm('Delete this countdown?')) await remove(ref(database, `countdowns/${id}`));
+    };
   </script>
 </body>
 </html>
